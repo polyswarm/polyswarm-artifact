@@ -1,0 +1,42 @@
+services:
+  - docker:dind
+
+stages:
+  - test
+  - pypi
+
+variables:
+  STAGE_IMAGE: $CI_CUSTOM_DEV_REGISTRY_URI/ci-images/stage:latest
+
+test:
+  image: $STAGE_IMAGE
+  stage: test
+  tags:
+    - docker
+  script:
+    - tox -e py36
+  except:
+    - images
+
+push-to-pypi:
+  image: $STAGE_IMAGE
+  stage: pypi
+  tags:
+    - docker
+  only:
+    - tags
+  script:
+    - python setup.py sdist bdist_wheel
+
+    # check git tag version vs setup.py version. bail if not equal.
+    - >-
+      tagver=$(git describe --abbrev=0 --tags)
+      setupver=$(grep "version=" setup.py | cut -d"'" -f 2)
+
+      if [ $tagver != $setupver ]; then
+        echo "git tag version ($tagver) does not match setup.py version ($setupver)"
+        exit 1
+      fi
+
+    # using env variables from Gitlab: TWINE_USERNAME, TWINE_PASSWORD, TWINE_REPOSITORY_URL
+    - twine upload dist/*

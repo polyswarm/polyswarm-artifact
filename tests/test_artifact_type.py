@@ -1,4 +1,4 @@
-from src.polyswarmartifact import ArtifactType
+from polyswarmartifact import ArtifactType
 
 
 def test_file_artifact_type_from_lowercase_string():
@@ -33,11 +33,20 @@ def test_url_artifact_type_from_uppercase_string():
     assert artifact_type == ArtifactType.URL
 
 
+def test_fake_artifact_type_from_uppercase_string():
+    # arrange
+    # act
+    artifact_type = ArtifactType.from_string('fake')
+    # assert
+    assert artifact_type is None
+
+
 def test_file_artifact_type_to_string():
     # arrange
     # act
     # assert
     assert ArtifactType.to_string(ArtifactType.FILE) == 'file'
+
 
 def test_url_artifact_type_to_string():
     # arrange

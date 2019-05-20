@@ -2,11 +2,24 @@ services:
   - docker:dind
 
 stages:
+  - ciimage
   - test
   - pypi
 
 variables:
   STAGE_IMAGE: $CI_CUSTOM_DEV_REGISTRY_URI/ci-images/stage:latest
+
+buildciimage:
+  image: $STAGE_IMAGE
+  tags:
+    - docker
+  stage: ciimage
+  script:
+    - docker login -u "$CI_CUSTOM_DEV_REGISTRY_USERNAME" -p "$CI_CUSTOM_DEV_REGISTRY_PASSWORD" "$CI_CUSTOM_DEV_REGISTRY_URI"
+    - docker build -t $STAGE_IMAGE  docker/ci-image/
+    - docker push $STAGE_IMAGE
+  only:
+    - images
 
 test:
   image: $STAGE_IMAGE

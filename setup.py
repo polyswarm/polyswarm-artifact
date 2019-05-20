@@ -13,7 +13,7 @@ with open('README.md', 'r') as readme:
 
 setup(
     name='polyswarm-artifact',
-    version='0.1.0rc3',
+    version='0.1.0rc4',
     description='Library containing artifact type enums and functions',
     long_description=long_description,
     long_description_content_type='text/markdown',

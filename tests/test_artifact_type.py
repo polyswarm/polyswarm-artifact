@@ -74,6 +74,3 @@ def test_url_artifact_type_to_int():
     # act
     # assert
     assert ArtifactType.URL.value == 1
-
-
-

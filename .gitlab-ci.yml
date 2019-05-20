@@ -52,4 +52,4 @@ push-to-pypi:
       fi
 
     # using env variables from Gitlab: TWINE_USERNAME, TWINE_PASSWORD, TWINE_REPOSITORY_URL
-    - twine upload --repository-url $TWINE_REPOSITORY_URL_TEST -u $TWINE_USERNAME_TEST -p $TWINE_PASSWORD_TEST dist/*
+    - twine upload dist/*

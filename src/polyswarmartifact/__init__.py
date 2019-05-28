@@ -11,10 +11,11 @@ class ArtifactType(Enum):
 
     @staticmethod
     def from_string(value):
-        try:
-            return ArtifactType[value.upper()]
-        except KeyError:
-            logger.critical(f'{value} is not a supported artifact type')
+        if value is not None:
+            try:
+                return ArtifactType[value.upper()]
+            except KeyError:
+                logger.critical(f'{value} is not a supported artifact type')
 
     @staticmethod
     def to_string(artifact_type):

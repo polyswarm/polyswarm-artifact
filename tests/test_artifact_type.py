@@ -41,6 +41,14 @@ def test_fake_artifact_type_from_uppercase_string():
     assert artifact_type is None
 
 
+def test_none_artifact_type():
+    # arrange
+    # act
+    artifact_type = ArtifactType.from_string(None)
+    # assert
+    assert artifact_type is None
+
+
 def test_file_artifact_type_to_string():
     # arrange
     # act

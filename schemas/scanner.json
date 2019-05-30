@@ -43,8 +43,8 @@
                 }
             },
             "required": ["polyswarmartifact_version","environment"]
-        },
-        "extra": {"type": "object"}
+        }
     },
+    "additionalItems": {"type": "object"},
     "required": ["malware_family", "microengine_info"]
 }

@@ -1,0 +1,50 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "../schemas/scanner.json",
+    "type": "object",
+    "properties": {
+        "malware_family": {"type": "string"},
+        "domains": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 0
+
+        },
+        "ip_addresses": {
+            "type": "array",
+            "items": {"type": "string"},
+            "minItems": 0
+        },
+        "stix": {
+            "type": "object",
+            "properties": {
+                "version": {"type": "string"},
+                "definitions": {
+                    "type": "array",
+                    "items": {"type": "object"}
+                }
+            }
+        },
+        "microengine_info": {
+            "type": "object",
+            "properties": {
+                "polyswarmclient_version": {"type": "string"},
+                "polyswarmartifact_version": {"type":  "string"},
+                "microengine_version": {"type": "string"},
+                "vendor_version": {"type": "string"},
+                "signature_version": {"type": "string"},
+                "environment": {
+                    "type": "object",
+                    "properties": {
+                        "operating_system": {"type": "string"},
+                        "architecture": {"type": "string"}
+                    },
+                    "required": ["operating_system", "architecture"]
+                }
+            },
+            "required": ["polyswarmartifact_version","environment"]
+        },
+        "extra": {"type": "object"}
+    },
+    "required": ["malware_family", "microengine_info"]
+}

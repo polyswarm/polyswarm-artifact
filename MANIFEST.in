@@ -1,1 +1,2 @@
 include requirements.txt
+include src/polyswarmartifact/schema/schemas/*.json

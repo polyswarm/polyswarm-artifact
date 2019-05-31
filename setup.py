@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from src.polyswarmartifact import __version__
 
 
 def parse_requirements():
@@ -13,7 +14,7 @@ with open('README.md', 'r') as readme:
 
 setup(
     name='polyswarm-artifact',
-    version='1.0.0',
+    version=__version__,
     description='Library containing artifact type enums and functions',
     long_description=long_description,
     long_description_content_type='text/markdown',

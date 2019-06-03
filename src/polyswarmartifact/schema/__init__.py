@@ -36,16 +36,7 @@ class Schema(ABC):
         :param value: Dict or array to compare
         :return: Boolean, True if JSON matches the schema
         """
-        try:
-            version = value.get('version', '')
-        except AttributeError:
-            logger.exception("Missing top level version in json blob")
-            return False
-
-        if not re.match(r"^\d+\.\d+\.\d+$", version):
-            raise ValueError('Version does not match polyswarmartifact versions')
-
-        schema_path, schema_name = cls.get_schema(version)
+        schema_path, schema_name = cls.get_schema()
         if not os.path.exists(schema_path):
             raise FileNotFoundError(f'Cannot find schema_path: {schema_path}')
 

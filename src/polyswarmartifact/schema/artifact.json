@@ -1,12 +1,8 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "../1.0.0/scanner.json",
+    "$id": "../schema/artifact.json",
     "type": "object",
     "properties": {
-        "version": {
-            "type":  "string",
-            "pattern": "^\\d+\\.\\d+\\.\\d+$"
-        },
         "malware_family": {"type": "string"},
         "domains": {
             "type": ["array", "null"],
@@ -28,14 +24,14 @@
                 }
             }
         },
-        "microengine_info": {
+        "scanner_info": {
             "type": "object",
             "properties": {
-                "polyswarmclient_version": {
+                "scanner_version": {
                     "type": ["string", "null"],
                     "pattern": "^\\d+\\.\\d+\\.\\d+$"
                 },
-                "microengine_version": {
+                "polyswarmclient_version": {
                     "type": ["string", "null"],
                     "pattern": "^\\d+\\.\\d+\\.\\d+$"
                 },

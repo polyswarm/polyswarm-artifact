@@ -5,7 +5,7 @@ import pkg_resources
 from . import Schema
 
 
-class Scanner(Schema):
+class Artifact(Schema):
     def __init__(self):
         self.malware_family = None
         self.microengine_info = None
@@ -45,25 +45,25 @@ class Scanner(Schema):
         return self
 
     @classmethod
-    def get_schema(cls, version):
+    def get_schema(cls):
         """
         Get the path to the backing schema this Metadata object users
         :return: Tuple[string, string] where first string is the path,
         and the second is the schema name
         """
-        return pkg_resources.resource_filename(__name__, os.path.join(version, 'scanner.json')), 'scanner'
+        return pkg_resources.resource_filename(__name__, os.path.join('artifact.json')), 'artifact'
 
     def json(self):
         """
         Convert metadata implementation into json string
         :return: JSON string representing the internal type of this object
         """
-        if self.version is None or self.malware_family is None or self.microengine_info is None:
-            raise ValueError('Invalid Scanner setup')
+        if self.malware_family is None or self.microengine_info is None:
+            raise ValueError('Invalid Artifact setup')
 
-        output = ScannerEncoder().encode(self)
-        if not Scanner.validate(output):
-            raise ValueError('Invalid Scanner setup')
+        output = ArtifactEncoder().encode(self)
+        if not Artifact.validate(output):
+            raise ValueError('Invalid Artifact setup')
 
         return output
 
@@ -71,9 +71,9 @@ class Scanner(Schema):
         self.malware_family = malware_family
         return self
 
-    def set_microengine_info(self, operating_system, architecure,
-                             polyswarmclient_version=None, microengine_version=None, signatures_version=None):
-        self.microengine_info = {
+    def set_scanner_info(self, operating_system, architecure, polyswarmclient_version=None, scanner_version=None,
+                         signatures_version=None):
+        self.scanner_info = {
             "environment": {
                 "operating_system": operating_system,
                 "architecture": architecure
@@ -82,16 +82,16 @@ class Scanner(Schema):
         if polyswarmclient_version is not None:
             self.microengine_info["polyswarmclient_version"] = polyswarmclient_version
 
-        if microengine_version is not None:
-            self.microengine_info["polyswarmclient_version"] = microengine_version
+        if scanner_version is not None:
+            self.scanner_version["scanner_version"] = scanner_version
 
         if signatures_version is not None:
             self.microengine_info["signatures_version"] = signatures_version
 
 
-class ScannerEncoder(json.JSONEncoder):
+class ArtifactEncoder(json.JSONEncoder):
     def encode(self, obj):
-        if isinstance(obj, Scanner):
+        if isinstance(obj, Artifact):
             output = {
                 "malware_family": obj.malware_family,
                 "microengine_info": obj.microengine_info

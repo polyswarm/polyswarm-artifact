@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import re
 
 from abc import ABC, abstractmethod
 from jsonschema import validate, RefResolver, ValidationError
@@ -12,10 +11,9 @@ logger = logging.getLogger(__name__)
 class Schema(ABC):
     @classmethod
     @abstractmethod
-    def get_schema(cls, version):
+    def get_schema(cls):
         """
         Get the path to the backing schema this Metadata object users
-        :param version: Version of the schema to find
         :return: Tuple[string, string] where first string is the path,
         and the second is the schema name
         """

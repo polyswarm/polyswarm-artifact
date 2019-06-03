@@ -5,10 +5,10 @@ import pkg_resources
 from . import Schema
 
 
-class Artifact(Schema):
+class Verdict(Schema):
     def __init__(self):
         self.malware_family = None
-        self.microengine_info = None
+        self.scanner = None
         self.domains = None
         self.ip_addresses = None
         self.stix = None
@@ -22,11 +22,10 @@ class Artifact(Schema):
         return self
 
     def add_extra(self, key, value):
-        if isinstance(value, dict):
-            if self.extra is None:
-                self.extra = []
+        if self.extra is None:
+            self.extra = []
 
-            self.extra.append({key: value})
+        self.extra.append((key, value))
 
         return self
 
@@ -41,7 +40,7 @@ class Artifact(Schema):
         if self.stix is None:
             self.stix = []
 
-        self.stix.push({"schema": schema, "signature": signature})
+        self.stix.append({"schema": schema, "signature": signature})
         return self
 
     @classmethod
@@ -51,18 +50,15 @@ class Artifact(Schema):
         :return: Tuple[string, string] where first string is the path,
         and the second is the schema name
         """
-        return pkg_resources.resource_filename(__name__, os.path.join('artifact.json')), 'artifact'
+        return pkg_resources.resource_filename(__name__, os.path.join('verdict.json')), 'verdict'
 
     def json(self):
         """
         Convert metadata implementation into json string
         :return: JSON string representing the internal type of this object
         """
-        if self.malware_family is None or self.microengine_info is None:
-            raise ValueError('Invalid Artifact setup')
-
-        output = ArtifactEncoder().encode(self)
-        if not Artifact.validate(output):
+        output = VerdictEncoder().encode(self)
+        if not Verdict.validate(json.loads(output)):
             raise ValueError('Invalid Artifact setup')
 
         return output
@@ -71,31 +67,41 @@ class Artifact(Schema):
         self.malware_family = malware_family
         return self
 
-    def set_scanner_info(self, operating_system, architecure, polyswarmclient_version=None, scanner_version=None,
-                         signatures_version=None):
-        self.scanner_info = {
-            "environment": {
+    def set_scanner(self, operating_system=None, architecure=None, version=None, polyswarmclient_version=None,
+                    signatures_version=None, vendor_version=None):
+        scanner = {}
+
+        if operating_system is not None or architecure is not None:
+            scanner["environment"] = {
                 "operating_system": operating_system,
                 "architecture": architecure
             }
-        }
-        if polyswarmclient_version is not None:
-            self.microengine_info["polyswarmclient_version"] = polyswarmclient_version
 
-        if scanner_version is not None:
-            self.scanner_version["scanner_version"] = scanner_version
+        if polyswarmclient_version is not None:
+            scanner["polyswarmclient_version"] = polyswarmclient_version
+
+        if version is not None:
+            scanner["version"] = version
 
         if signatures_version is not None:
-            self.microengine_info["signatures_version"] = signatures_version
+            scanner["signatures_version"] = signatures_version
+
+        if vendor_version is not None:
+            scanner['vendor_version'] = vendor_version
+
+        self.scanner = scanner if scanner else None
+        return self
 
 
-class ArtifactEncoder(json.JSONEncoder):
+class VerdictEncoder(json.JSONEncoder):
     def encode(self, obj):
-        if isinstance(obj, Artifact):
+        if isinstance(obj, Verdict):
             output = {
                 "malware_family": obj.malware_family,
-                "microengine_info": obj.microengine_info
             }
+
+            if obj.scanner:
+                output["scanner"] = obj.scanner
 
             if obj.domains:
                 output['domains'] = obj.domains
@@ -107,8 +113,7 @@ class ArtifactEncoder(json.JSONEncoder):
                 output['stix'] = obj.stix
 
             if obj.extra:
-                for key, value in obj.extra.items():
-                    if isinstance(value, dict):
-                        output[key] = value
+                for key, value in obj.extra:
+                    output[key] = value
 
             return json.dumps(output)

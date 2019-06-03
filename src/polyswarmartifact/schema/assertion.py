@@ -3,17 +3,14 @@ import os
 import pkg_resources
 
 from . import Schema
-from .artifact import ArtifactEncoder
+from .verdict import VerdictEncoder
 
 
 class Assertion(Schema):
     def __init__(self, ):
-        self.artifacts = None
+        self.artifacts = []
 
     def add_artifact(self, artifact):
-        if self.artifacts is None:
-            self.artifacts = []
-
         self.artifacts.append(artifact)
         return self
 
@@ -34,8 +31,10 @@ class Assertion(Schema):
         Convert metadata implementation into json string
         :return: JSON string representing the internal type of this object
         """
+        if any([artifact is None for artifact in self.artifacts]):
+            raise ValueError('Artifacts cannot be None')
         output = AssertionEncoder().encode(self)
-        if not Assertion.validate(output):
+        if not Assertion.validate(json.loads(output)):
             raise ValueError('Invalid Bounty setup')
 
         return output
@@ -44,4 +43,4 @@ class Assertion(Schema):
 class AssertionEncoder(json.JSONEncoder):
     def encode(self, obj):
         if isinstance(obj, Assertion):
-            return json.dumps([ArtifactEncoder().encode(artifact) for artifact in obj.artifacts])
+            return json.dumps([json.loads(VerdictEncoder().encode(artifact)) for artifact in obj.artifacts])

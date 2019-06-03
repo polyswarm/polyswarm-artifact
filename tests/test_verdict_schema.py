@@ -99,13 +99,6 @@ def test_validate_domains():
     assert Verdict.validate(json.loads(verdict.json()))
 
 
-def test_encode_none_domain_list():
-    pass
-
-def test_encode_empty_domain_list():
-    pass
-
-
 def test_add_ip():
     # arrange
     verdict = Verdict()
@@ -144,25 +137,16 @@ def test_validate_ip_invalid():
         verdict.json()
 
 
-
-def test_encode_none_ip_address_list():
-    pass
-
-
-def test_encode_empty_ip_address_list():
-    pass
-
-
 def test_add_stix_object():
     # arrange
     verdict = Verdict()
     # act
     verdict.add_stix(
-        'https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json',
+        'oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json',
         "a0"
     )
     # assert
-    assert verdict.stix[0]['schema'] == 'https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json'
+    assert verdict.stix[0]['schema'] == 'oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json'
     assert verdict.stix[0]['signature'] == "a0"
 
 
@@ -170,12 +154,12 @@ def test_add_stix_string():
     # arrange
     verdict = Verdict()
     # act
-    verdict.add_stix('https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json', {
+    verdict.add_stix('oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json', {
         "kill_chain_name": 'asdf',
         "phase_name": "full"
     })
     # assert
-    assert verdict.stix[0]['schema'] == 'https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json'
+    assert verdict.stix[0]['schema'] == 'oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json'
     assert verdict.stix[0]['signature'] == {
         "kill_chain_name": 'asdf',
         "phase_name": "full"
@@ -187,22 +171,12 @@ def test_validate_stix_object():
     verdict = Verdict().set_malware_family("Eicar")
     # act
     verdict.add_stix(
-        'https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json', {
+        'oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json', {
             "kill_chain_name": 'asdf',
             "phase_name": "full"
         })
     # assert
     assert Verdict.validate(json.loads(verdict.json()))
-
-
-def test_encode_stix():
-    pass
-
-def test_encode_none_stix_list():
-    pass
-
-def test_encode_empty_stix_list():
-    pass
 
 
 def test_set_scanner_os():
@@ -337,6 +311,7 @@ def test_scanner_null_psc_version():
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
+
 def test_scanner_invalid_psc_version():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
@@ -357,6 +332,7 @@ def test_scanner_no_signature_version():
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
+
 def test_scanner_null_signature_version():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
@@ -365,6 +341,7 @@ def test_scanner_null_signature_version():
                         signatures_version=None, vendor_version="1.0.0")
     # assert
     Verdict.validate(json.loads(verdict.json()))
+
 
 def test_scanner_no_vendor_version():
     # arrange
@@ -430,8 +407,8 @@ def test_scanner_environemnt_null_arch():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.set_scanner(operating_system="windows", architecure="None", version="1.0.0", polyswarmclient_version="2.0.2",
-                        signatures_version="2019", vendor_version="1.0.0")
+    verdict.set_scanner(operating_system="windows", architecure="None", version="1.0.0",
+                        polyswarmclient_version="2.0.2", signatures_version="2019", vendor_version="1.0.0")
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
@@ -502,7 +479,7 @@ def test_validate_all_output():
         .add_domain('polyswarm.io')\
         .add_ip_address('192.168.0.1')\
         .add_stix(
-        'https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json',
+        'oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json',
         "a0"
         ) \
         .set_scanner(operating_system="windows", architecure="x86", version="1.0.0", polyswarmclient_version="2.0.2",
@@ -516,14 +493,14 @@ def test_validate_all_output():
         "domains": ["polyswarm.io"],
         "ip_addresses": ["192.168.0.1"],
         "stix": [{
-            "schema": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
             "signature": "a0"
         }],
         "scanner": {
             "version": "1.0.0",
             "polyswarmclient_version": "2.0.2",
             "signatures_version": "2019",
-            "vendor_version":"1.0.0",
+            "vendor_version": "1.0.0",
             "environment": {
                 "operating_system": "windows",
                 "architecture": "x86"
@@ -542,7 +519,234 @@ def test_validate_all_output():
     assert blob == result
 
 
-# Test for extra values during validation
+def test_empty_domain_list():
+    # arrange
+    blob = {
+        "malware_family": "Eicar",
+        "domains": [],
+        "ip_addresses": ["192.168.0.1"],
+        "stix": [{
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "signature": "a0"
+        }],
+        "scanner": {
+            "extra": "test",
+            "version": "1.0.0",
+            "polyswarmclient_version": "2.0.2",
+            "signatures_version": "2019",
+            "vendor_version": "1.0.0",
+            "environment": {
+                "operating_system": "windows",
+                "architecture": "x86"
+            }
+        },
+    }
+    # assert
+    assert Verdict.validate(blob)
+
+
+def test_none_domain_list():
+    # arrange
+    blob = {
+        "malware_family": "Eicar",
+        "domains": None,
+        "ip_addresses": ["192.168.0.1"],
+        "stix": [{
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "signature": "a0"
+        }],
+        "scanner": {
+            "extra": "test",
+            "version": "1.0.0",
+            "polyswarmclient_version": "2.0.2",
+            "signatures_version": "2019",
+            "vendor_version": "1.0.0",
+            "environment": {
+                "operating_system": "windows",
+                "architecture": "x86"
+            }
+        },
+    }
+    # assert
+    assert Verdict.validate(blob)
+
+
+def test_empty_ip_list():
+    # arrange
+    blob = {
+        "malware_family": "Eicar",
+        "domains": ["polyswarm.io"],
+        "ip_addresses": [],
+        "stix": [{
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "signature": "a0"
+        }],
+        "scanner": {
+            "extra": "test",
+            "version": "1.0.0",
+            "polyswarmclient_version": "2.0.2",
+            "signatures_version": "2019",
+            "vendor_version": "1.0.0",
+            "environment": {
+                "operating_system": "windows",
+                "architecture": "x86"
+            }
+        },
+    }
+    # assert
+    assert Verdict.validate(blob)
+
+
+def test_none_ip_list():
+    # arrange
+    blob = {
+        "malware_family": "Eicar",
+        "domains": ["polyswarm.io"],
+        "ip_addresses": None,
+        "stix": [{
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "signature": "a0"
+        }],
+        "scanner": {
+            "extra": "test",
+            "version": "1.0.0",
+            "polyswarmclient_version": "2.0.2",
+            "signatures_version": "2019",
+            "vendor_version": "1.0.0",
+            "environment": {
+                "operating_system": "windows",
+                "architecture": "x86"
+            }
+        },
+    }
+    # assert
+    assert Verdict.validate(blob)
+
+
+def test_empty_stix_list():
+    # arrange
+    blob = {
+        "malware_family": "Eicar",
+        "domains": ["polyswarm.io"],
+        "ip_addresses": ["192.168.0.1"],
+        "stix": [],
+        "scanner": {
+            "extra": "test",
+            "version": "1.0.0",
+            "polyswarmclient_version": "2.0.2",
+            "signatures_version": "2019",
+            "vendor_version": "1.0.0",
+            "environment": {
+                "operating_system": "windows",
+                "architecture": "x86"
+            }
+        },
+    }
+    # assert
+    assert Verdict.validate(blob)
+
+
+def test_none_stix_list():
+    # arrange
+    blob = {
+        "malware_family": "Eicar",
+        "domains": ["polyswarm.io"],
+        "ip_addresses": ["192.168.0.1"],
+        "stix": None,
+        "scanner": {
+            "extra": "test",
+            "version": "1.0.0",
+            "polyswarmclient_version": "2.0.2",
+            "signatures_version": "2019",
+            "vendor_version": "1.0.0",
+            "environment": {
+                "operating_system": "windows",
+                "architecture": "x86"
+            }
+        },
+    }
+    # assert
+    assert Verdict.validate(blob)
+
+
+def test_empty_scanner():
+    # arrange
+    blob = {
+        "malware_family": "Eicar",
+        "domains": ["polyswarm.io"],
+        "ip_addresses": ["192.168.0.1"],
+        "stix": [{
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "signature": "a0"
+        }],
+        "scanner": {}
+    }
+    # assert
+    assert Verdict.validate(blob)
+
+
+def test_none_scanner():
+    # arrange
+    blob = {
+        "malware_family": "Eicar",
+        "domains": ["polyswarm.io"],
+        "ip_addresses": ["192.168.0.1"],
+        "stix": [{
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "signature": "a0"
+        }],
+        "scanner": None,
+    }
+    # assert
+    assert Verdict.validate(blob)
+
+
+def test_empty_environment():
+    # arrange
+    blob = {
+        "malware_family": "Eicar",
+        "domains": ["polyswarm.io"],
+        "ip_addresses": ["192.168.0.1"],
+        "stix": [{
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "signature": "a0"
+        }],
+        "scanner": {
+            "extra": "test",
+            "version": "1.0.0",
+            "polyswarmclient_version": "2.0.2",
+            "signatures_version": "2019",
+            "vendor_version": "1.0.0",
+            "environment": {}
+        },
+    }
+    # assert
+    assert Verdict.validate(blob)
+
+
+def test_none_environment():
+    # arrange
+    blob = {
+        "malware_family": "Eicar",
+        "domains": ["polyswarm.io"],
+        "ip_addresses": ["192.168.0.1"],
+        "stix": [{
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "signature": "a0"
+        }],
+        "scanner": {
+            "extra": "test",
+            "version": "1.0.0",
+            "polyswarmclient_version": "2.0.2",
+            "signatures_version": "2019",
+            "vendor_version": "1.0.0",
+            "environment": None
+        },
+    }
+    # assert
+    assert Verdict.validate(blob)
+
+
 def test_extra_string_scanner():
     # arrange
     blob = {
@@ -550,7 +754,7 @@ def test_extra_string_scanner():
         "domains": ["polyswarm.io"],
         "ip_addresses": ["192.168.0.1"],
         "stix": [{
-            "schema": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
             "signature": "a0"
         }],
         "scanner": {
@@ -576,7 +780,7 @@ def test_extra_array_scanner():
         "domains": ["polyswarm.io"],
         "ip_addresses": ["192.168.0.1"],
         "stix": [{
-            "schema": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
             "signature": "a0"
         }],
         "scanner": {
@@ -602,7 +806,7 @@ def test_extra_object_scanner():
         "domains": ["polyswarm.io"],
         "ip_addresses": ["192.168.0.1"],
         "stix": [{
-            "schema": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
             "signature": "a0"
         }],
         "scanner": {
@@ -629,7 +833,7 @@ def test_extra_string_stix():
         "ip_addresses": ["192.168.0.1"],
         "stix": [{
             "extra": "test",
-            "schema": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
             "signature": "a0"
         }],
         "scanner": {
@@ -655,7 +859,7 @@ def test_extra_array_stix():
         "ip_addresses": ["192.168.0.1"],
         "stix": [{
             "extra": ["test"],
-            "schema": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
             "signature": "a0"
         }],
         "scanner": {
@@ -681,7 +885,7 @@ def test_extra_object_stix():
         "ip_addresses": ["192.168.0.1"],
         "stix": [{
             "extra": {"test": "tester"},
-            "schema": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
             "signature": "a0"
         }],
         "scanner": {
@@ -706,7 +910,7 @@ def test_extra_string_environment():
         "domains": ["polyswarm.io"],
         "ip_addresses": ["192.168.0.1"],
         "stix": [{
-            "schema": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
             "signature": "a0"
         }],
         "scanner": {
@@ -732,7 +936,7 @@ def test_extra_array_environment():
         "domains": ["polyswarm.io"],
         "ip_addresses": ["192.168.0.1"],
         "stix": [{
-            "schema": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
             "signature": "a0"
         }],
         "scanner": {
@@ -758,7 +962,7 @@ def test_extra_object_environment():
         "domains": ["polyswarm.io"],
         "ip_addresses": ["192.168.0.1"],
         "stix": [{
-            "schema": "https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
+            "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json",
             "signature": "a0"
         }],
         "scanner": {

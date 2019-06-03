@@ -5,7 +5,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 __version__ = '1.1.0'
-LATEST_SCHEMA_VERSION = "1.0.0"
 
 
 class ArtifactType(Enum):

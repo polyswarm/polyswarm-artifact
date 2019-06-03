@@ -2,7 +2,6 @@ import json
 import os
 import pkg_resources
 
-from .. import LATEST_SCHEMA_VERSION
 from . import Schema
 from .scanner import ScannerEncoder
 
@@ -10,7 +9,6 @@ from .scanner import ScannerEncoder
 class Microengine(Schema):
     def __init__(self, ):
         self.scanners = None
-        self.version = None
 
     def add_scanner(self, scanner):
         if self.scanners is None:
@@ -46,9 +44,6 @@ class Microengine(Schema):
 class MicroengineEncoder(json.JSONEncoder):
     def encode(self, obj):
         if isinstance(obj, Microengine):
-            output = {
-                "version": LATEST_SCHEMA_VERSION,
-                "scanners": [ScannerEncoder().encode(scanner) for scanner in obj.scanners]
-            }
+            output = [ScannerEncoder().encode(scanner) for scanner in obj.scanners]
 
             return json.dumps(output)

@@ -3,12 +3,10 @@ import os
 import pkg_resources
 
 from . import Schema
-from .. import LATEST_SCHEMA_VERSION
 
 
 class Scanner(Schema):
     def __init__(self):
-        self.version = None
         self.malware_family = None
         self.microengine_info = None
         self.domains = None
@@ -95,7 +93,6 @@ class ScannerEncoder(json.JSONEncoder):
     def encode(self, obj):
         if isinstance(obj, Scanner):
             output = {
-                "version": LATEST_SCHEMA_VERSION,
                 "malware_family": obj.malware_family,
                 "microengine_info": obj.microengine_info
             }

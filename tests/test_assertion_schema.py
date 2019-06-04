@@ -60,6 +60,19 @@ def test_add_artifact():
     assert assertion.artifacts and assertion.artifacts[0] == artifact
 
 
+def test_add_artifacts():
+    # arrange
+    artifact = Verdict() \
+        .set_malware_family("Eicar")
+    assertion = Assertion()
+    # act
+    assertion.add_artifacts([artifact for i in range(0, 3)])
+    # assert
+    assert assertion.artifacts
+    assert len(assertion.artifacts) == 3
+    assert assertion.artifacts[0] == artifact
+
+
 def test_builder_no_artifacts_throws_value_error():
     # arrange
     assertion = Assertion()

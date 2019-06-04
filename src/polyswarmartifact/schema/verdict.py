@@ -21,11 +21,27 @@ class Verdict(Schema):
         self.domains.append(domain)
         return self
 
+    def add_domains(self, domains):
+        if self.domains is None:
+            self.domains = []
+
+        self.domains.extend(domains)
+        return self
+
     def add_extra(self, key, value):
         if self.extra is None:
             self.extra = []
 
         self.extra.append((key, value))
+
+        return self
+
+    def add_extras(self, extras):
+        if self.extra is None:
+            self.extra = []
+
+        for k, v in extras:
+            self.extra.append((k, v))
 
         return self
 
@@ -36,11 +52,26 @@ class Verdict(Schema):
         self.ip_addresses.append(ip_address)
         return self
 
-    def add_stix(self, schema, signature):
+    def add_ip_addresses(self, ip_addresses):
+        if self.ip_addresses is None:
+            self.ip_addresses = []
+
+        self.ip_addresses.extend(ip_addresses)
+        return self
+
+    def add_stix_signature(self, schema, signature):
         if self.stix is None:
             self.stix = []
 
         self.stix.append({"schema": schema, "signature": signature})
+        return self
+
+    def add_stix_signatures(self, signatures):
+        if self.stix is None:
+            self.stix = []
+
+        for schema, signature in signatures:
+            self.stix.append({"schema": schema, "signature": signature})
         return self
 
     @classmethod

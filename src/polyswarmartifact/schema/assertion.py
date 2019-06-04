@@ -14,6 +14,10 @@ class Assertion(Schema):
         self.artifacts.append(artifact)
         return self
 
+    def add_artifacts(self, artifacts):
+        self.artifacts.extend(artifacts)
+        return self
+
     @classmethod
     def get_schema(cls):
         """

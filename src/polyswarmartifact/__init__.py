@@ -4,6 +4,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+__version__ = '1.1.0'
+
 
 class ArtifactType(Enum):
     FILE = 0

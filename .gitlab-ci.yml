@@ -44,7 +44,7 @@ push-to-pypi:
     # check git tag version vs setup.py version. bail if not equal.
     - >-
       tagver=$(git describe --abbrev=0 --tags)
-      setupver=$(grep "version=" setup.py | cut -d"'" -f 2)
+      setupver=$(grep "__version__ = " src/polyswarmartifact/__init__.py | cut -d"'" -f 2)
 
       if [ $tagver != $setupver ]; then
         echo "git tag version ($tagver) does not match setup.py version ($setupver)"

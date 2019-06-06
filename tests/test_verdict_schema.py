@@ -639,6 +639,26 @@ def test_validate_all_output():
     assert blob == result
 
 
+def test_validate_all_output_concrete():
+    # arrange
+    verdict = Verdict().set_malware_family("Eicar")\
+        .add_domain('polyswarm.io')\
+        .add_ip_address('192.168.0.1')\
+        .add_stix_signature(
+        'oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json',
+        "a0"
+        ) \
+        .set_scanner(operating_system="windows", architecure="x86", version="1.0.0", polyswarmclient_version="2.0.2",
+                     signatures_version="2019", vendor_version="1.0.0")\
+        .add_extra("new_key", {"other_key": "string_value"})\
+        .add_extra("new_key1", ["string_value"])\
+        .add_extra("new_key2", "string_value")\
+        .concrete()
+    # act
+    # assert
+    assert Verdict.validate(verdict)
+
+
 def test_empty_domain_list():
     # arrange
     blob = {

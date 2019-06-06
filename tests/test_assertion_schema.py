@@ -124,3 +124,15 @@ def test_builder_256_scanners_is_valid():
         assertion.add_artifact(artifact)
     # assert
     assert Assertion.validate(json.loads(assertion.json()))
+
+
+def test_builder_256_scanners_concrete():
+    # arrange
+    artifact = Verdict() \
+        .set_malware_family("Eicar")
+    assertion = Assertion()
+    # act
+    for i in range(0, 256):
+        assertion.add_artifact(artifact)
+    # assert
+    assert Assertion.validate(assertion.concrete())

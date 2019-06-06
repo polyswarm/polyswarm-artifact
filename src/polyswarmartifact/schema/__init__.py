@@ -27,6 +27,13 @@ class Schema(ABC):
         """
         raise NotImplementedError('json is not implemented')
 
+    def concrete(self):
+        """
+        Helper function to turn the json output into a concrete representation
+        :return: object representation
+        """
+        return json.loads(self.json())
+
     @classmethod
     def validate(cls, value):
         """

@@ -1,0 +1,24 @@
+{
+  "malware_family": "Eicar",
+  "domains": ["polyswarm.io"],
+  "ip_addresses": ["192.168.0.1"],
+  "stix": {
+    "schema": "'https://raw.githubusercontent.com/oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json'",
+    "signature": "a0"
+  },
+  "scanner": {
+    "version": "1.0.0",
+    "polyswarmclient_version": "2.0.2",
+    "signatures_version": "2019",
+    "vendor_version":"1.0.0",
+    "environment": {
+      "operating_system": "windows",
+      "architecture": "x86"
+    }
+  },
+  "new_key": {
+    "other_key": "string_value",
+  },
+  "new_key1": ["string_value"],
+  "new_key2": "string_value"
+}

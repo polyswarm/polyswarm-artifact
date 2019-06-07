@@ -98,14 +98,14 @@ class Verdict(Schema):
         self.malware_family = malware_family
         return self
 
-    def set_scanner(self, operating_system=None, architecure=None, version=None, polyswarmclient_version=None,
+    def set_scanner(self, operating_system=None, architecture=None, version=None, polyswarmclient_version=None,
                     signatures_version=None, vendor_version=None):
         scanner = {}
 
-        if operating_system is not None or architecure is not None:
+        if operating_system is not None or architecture is not None:
             scanner["environment"] = {
                 "operating_system": operating_system,
-                "architecture": architecure
+                "architecture": architecture
             }
 
         if polyswarmclient_version is not None:

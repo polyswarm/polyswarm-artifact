@@ -2,7 +2,7 @@ import json
 import os
 import pkg_resources
 
-from . import Schema
+from .schema import Schema
 
 
 class Verdict(Schema):

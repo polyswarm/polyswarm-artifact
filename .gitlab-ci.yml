@@ -1,41 +1,40 @@
+image: $REPO_URL/stage
+
 services:
   - docker:dind
 
 stages:
-  - ciimage
+  - build
   - test
-  - pypi
+  - release
 
 variables:
-  STAGE_IMAGE: $CI_CUSTOM_DEV_REGISTRY_URI/ci-images/stage:latest
+  DOCKER_HOST: tcp://localhost:2375/
 
-buildciimage:
-  image: $STAGE_IMAGE
-  tags:
-    - docker
-  stage: ciimage
-  script:
-    - docker login -u "$CI_CUSTOM_DEV_REGISTRY_USERNAME" -p "$CI_CUSTOM_DEV_REGISTRY_PASSWORD" "$CI_CUSTOM_DEV_REGISTRY_URI"
-    - docker build -t $STAGE_IMAGE  docker/ci-image/
-    - docker push $STAGE_IMAGE
-  only:
-    - images
+###############################################################
+# Build Stage (jobs inside a stage run in parallel)
+###############################################################
 
+###############################################################
+# Test Stage
+###############################################################
 test:
-  image: $STAGE_IMAGE
+
   stage: test
   tags:
-    - docker
+    - kube
   script:
     - tox -e py36
   except:
     - images
 
-push-to-pypi:
-  image: $STAGE_IMAGE
-  stage: pypi
+###############################################################
+# Release Stage
+###############################################################
+release:
+  stage: release
   tags:
-    - docker
+    - kube
   only:
     - tags
   script:

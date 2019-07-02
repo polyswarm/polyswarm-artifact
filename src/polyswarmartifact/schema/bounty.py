@@ -63,7 +63,7 @@ class Bounty(Schema):
         return output
 
     @classmethod
-    def validate(cls, value, resolver=None):
+    def validate(cls, value, resolver=None, silent=False):
         schema_path, schema_name = cls.get_schema()
         if not os.path.exists(schema_path):
             raise FileNotFoundError(f'Cannot find schema_path: {schema_path}')
@@ -72,7 +72,7 @@ class Bounty(Schema):
             schema = json.loads(f.read())
 
         resolver = RefResolver.from_schema(schema)
-        return super().validate(value, resolver)
+        return super().validate(value, resolver, silent)
 
 
 class BountyEncoder(json.JSONEncoder):

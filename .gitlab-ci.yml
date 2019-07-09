@@ -18,13 +18,22 @@ variables:
 ###############################################################
 # Test Stage
 ###############################################################
-test:
-
+test-py36:
   stage: test
   tags:
     - kube
   script:
-    - tox -e py36,py35
+    - tox -e py36
+  except:
+    - images
+
+test-py35:
+  image: python:3.5
+  stage: test
+  tags:
+    - kube
+  script:
+    - tox -e py35
   except:
     - images
 

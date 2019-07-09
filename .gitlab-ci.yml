@@ -32,6 +32,8 @@ test-py35:
   stage: test
   tags:
     - kube
+  before_script:
+    - pip3 install tox
   script:
     - tox -e py35
   except:

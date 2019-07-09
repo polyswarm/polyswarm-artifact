@@ -66,7 +66,7 @@ class Bounty(Schema):
     def validate(cls, value, resolver=None, silent=False):
         schema_path, schema_name = cls.get_schema()
         if not os.path.exists(schema_path):
-            raise FileNotFoundError(f'Cannot find schema_path: {schema_path}')
+            raise FileNotFoundError('Cannot find schema_path: {schema_path}'.format(schema_path=schema_path))
 
         with open(schema_path) as f:
             schema = json.loads(f.read())

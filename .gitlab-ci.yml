@@ -24,7 +24,7 @@ test:
   tags:
     - kube
   script:
-    - tox -e py36
+    - tox -e py36,py35
   except:
     - images
 

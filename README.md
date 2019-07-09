@@ -5,6 +5,8 @@
 
 Python package for mapping artifact types to the ArtifactType enum in the BountyRegistry contract.
 
+Supports python3 >=3.5.2 and >=3.6.5.
+
 # Versions in this schema
 
 Everything in here is meant to be a part of an evolving schema. 

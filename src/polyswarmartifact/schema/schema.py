@@ -44,7 +44,7 @@ class Schema(ABC):
             schema = json.loads(f.read())
 
         if resolver is None:
-            resolver = RefResolver(f'file://{schema_path}', schema_name)
+            resolver = RefResolver("file://{schema_path}".format(schema_path=schema_path), schema_name)
 
         try:
             validate(instance=value, schema=schema, resolver=resolver)

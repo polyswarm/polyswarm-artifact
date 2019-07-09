@@ -136,7 +136,7 @@ def test_builder_256_scanners_is_valid():
     bounty = Bounty()
     # act
     for i in range(0, 256):
-        bounty.add_file_artifact(mimetype="text/plain", filename="file", filesize=f"{i}", sha256="sha256", sha1="sha1",
+        bounty.add_file_artifact(mimetype="text/plain", filename="file", filesize="{i}".format(i=i), sha256="sha256", sha1="sha1",
                                  md5="md5")
     # assert
     assert Bounty.validate(json.loads(bounty.json()))

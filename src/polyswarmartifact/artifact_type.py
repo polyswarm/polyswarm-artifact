@@ -14,7 +14,7 @@ class ArtifactType(Enum):
             try:
                 return ArtifactType[value.upper()]
             except KeyError:
-                logger.critical(f'{value} is not a supported artifact type')
+                logger.critical('%s is not a supported artifact type', value)
 
     @staticmethod
     def to_string(artifact_type):

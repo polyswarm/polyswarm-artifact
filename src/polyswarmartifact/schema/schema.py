@@ -38,13 +38,13 @@ class Schema(ABC):
         """
         schema_path, schema_name = cls.get_schema()
         if not os.path.exists(schema_path):
-            raise FileNotFoundError(f'Cannot find schema_path: {schema_path}')
+            raise FileNotFoundError('Cannot find schema_path: {schema_path}'.format(schema_path=schema_path))
 
         with open(schema_path) as f:
             schema = json.loads(f.read())
 
         if resolver is None:
-            resolver = RefResolver(f'file://{schema_path}', schema_name)
+            resolver = RefResolver('file://{schema_path}'.format(schema_path=schema_path), schema_name)
 
         try:
             validate(instance=value, schema=schema, resolver=resolver)

@@ -8,7 +8,7 @@ with open('README.md', 'r') as readme:
 
 setup(
     name='polyswarm-artifact',
-    version='1.2.0',
+    version='1.2.1',
     description='Library containing artifact type enums and functions',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -16,7 +16,7 @@ setup(
     author_email='info@polyswarm.io',
     url='https://github.com/polyswarm/polyswarm-artifact',
     license='MIT',
-    python_requires='>=3.6.5,<4',
+    python_requires='>=3.5.2,<4',
     install_requires=[
         'jsonschema'
     ],
@@ -27,6 +27,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: PyPy',

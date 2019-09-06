@@ -19,3 +19,12 @@ class ArtifactType(Enum):
     @staticmethod
     def to_string(artifact_type):
         return artifact_type.name.lower()
+
+    def decode_content(self, content):
+        if not content:
+            return None
+
+        if self == ArtifactType.URL:
+            return content.decode('utf-8')
+        else:
+            return content

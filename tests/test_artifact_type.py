@@ -71,6 +71,13 @@ def test_file_artifact_type_from_int():
     assert artifact_type == ArtifactType.FILE
 
 
+def test_file_decode():
+    # arrange
+    # act
+    # assert
+    assert ArtifactType.FILE.decode_content(b'test string') == b'test string'
+
+
 def test_url_artifact_type_from_int():
     # arrange
     # act
@@ -91,3 +98,24 @@ def test_url_artifact_type_to_int():
     # act
     # assert
     assert ArtifactType.URL.value == 1
+
+
+def test_url_decode():
+    # arrange
+    # act
+    # assert
+    assert ArtifactType.URL.decode_content(b'test string') == 'test string'
+
+
+def test_url_decode_empty():
+    # arrange
+    # act
+    # assert
+    assert ArtifactType.URL.decode_content(b'') == ''
+
+
+def test_url_decode_empty():
+    # arrange
+    # act
+    # assert
+    assert ArtifactType.URL.decode_content(None) == None

@@ -122,6 +122,14 @@ def test_invalid_artifact_throws_value_error():
         bounty.json()
 
 
+def test_invalid_mime_throws_value_error():
+    # arrange
+    # act
+    # assert
+    with pytest.raises(ValueError):
+        Bounty().add_file_artifact(mimetype=None)
+
+
 def test_builder_one_scanners_is_valid():
     # arrange
     # act
@@ -140,3 +148,9 @@ def test_builder_256_scanners_is_valid():
                                  md5="md5")
     # assert
     assert Bounty.validate(json.loads(bounty.json()))
+
+
+def test_validate_bad_file():
+    Bounty.get_schema = lambda : ('/fake', 'bounty')
+    with pytest.raises(FileNotFoundError):
+        Bounty.validate({})

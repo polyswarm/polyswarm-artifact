@@ -21,7 +21,7 @@ class ArtifactType(Enum):
         return artifact_type.name.lower()
 
     def decode_content(self, content):
-        if not content:
+        if content is None:
             return None
 
         if self == ArtifactType.URL:

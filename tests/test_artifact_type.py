@@ -1,4 +1,6 @@
+import pytest
 from polyswarmartifact import ArtifactType
+from polyswarmartifact.exceptions import DecodeError
 
 
 def test_file_artifact_type_from_lowercase_string():
@@ -114,8 +116,16 @@ def test_url_decode_empty():
     assert ArtifactType.URL.decode_content(b'') == ''
 
 
-def test_url_decode_empty():
+def test_url_decode_none():
     # arrange
     # act
     # assert
-    assert ArtifactType.URL.decode_content(None) == None
+    assert ArtifactType.URL.decode_content(None) is None
+
+
+def test_url_decode_invalid_raises():
+    # arrange
+    # act
+    # assert
+    with pytest.raises(DecodeError):
+        ArtifactType.URL.decode_content('asdf'.encode('utf-16'))

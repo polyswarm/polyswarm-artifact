@@ -1,5 +1,7 @@
-from enum import Enum
 import logging
+from enum import Enum
+
+from .exceptions import DecodeError
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +23,13 @@ class ArtifactType(Enum):
         return artifact_type.name.lower()
 
     def decode_content(self, content):
-        if not content:
+        if content is None:
             return None
 
         if self == ArtifactType.URL:
-            return content.decode('utf-8')
+            try:
+                return content.decode('utf-8')
+            except UnicodeDecodeError:
+                raise DecodeError('Error decoding URL')
         else:
             return content

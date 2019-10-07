@@ -16,7 +16,7 @@ setup(
     author_email='info@polyswarm.io',
     url='https://github.com/polyswarm/polyswarm-artifact',
     license='MIT',
-    python_requires='>=3.5.2,<4',
+    python_requires='>=2.7,<4',
     install_requires=[
         'jsonschema'
     ],

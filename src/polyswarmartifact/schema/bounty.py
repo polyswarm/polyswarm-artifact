@@ -1,10 +1,80 @@
 import json
-import os
 
-import pkg_resources
 from jsonschema import RefResolver
 
 from .schema import Schema
+
+BOUNTY_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "bounty",
+    "definitions": {
+        "file": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "filename": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "filesize": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "mimetype": {
+                        "type": "string"
+                    },
+                    "sha256": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "sha1": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "md5": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    }
+                },
+                "additionalProperties": True,
+                "required": [
+                    "mimetype"
+                ]
+            }
+        },
+        "url": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "protocol": {"type": "string"}
+                },
+                "additionalProperties": True,
+                "required": ["protocol"]
+            }
+        }
+    },
+    "type": "array",
+    "oneOf": [
+            {
+                "$ref": "#/definitions/file"
+            },
+            {
+                "$ref": "#/definitions/url"
+            }
+        ]
+}
 
 
 class Bounty(Schema):
@@ -46,10 +116,7 @@ class Bounty(Schema):
         :return: Tuple[string, string] where first string is the path,
         and the second is the schema name
         """
-        return (
-            pkg_resources.resource_filename(__name__, os.path.join('bounty.json')),
-            'bounty'
-        )
+        return BOUNTY_SCHEMA
 
     def json(self):
         """
@@ -64,14 +131,7 @@ class Bounty(Schema):
 
     @classmethod
     def validate(cls, value, resolver=None, silent=False):
-        schema_path, schema_name = cls.get_schema()
-        if not os.path.exists(schema_path):
-            raise FileNotFoundError('Cannot find schema_path: {schema_path}'.format(schema_path=schema_path))
-
-        with open(schema_path) as f:
-            schema = json.loads(f.read())
-
-        resolver = RefResolver.from_schema(schema)
+        resolver = RefResolver.from_schema(BOUNTY_SCHEMA)
         return super().validate(value, resolver, silent)
 
 

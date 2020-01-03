@@ -1,25 +1,7 @@
-import os
 import json
 
-import pkg_resources
 import pytest
-from polyswarmartifact.schema.bounty import Bounty, __name__ as bounty_name
-
-
-def test_get_schema_path_is_valid_file():
-    # arrange
-    # act
-    path, name = Bounty.get_schema()
-    # assert
-    assert path == pkg_resources.resource_filename(bounty_name, os.path.join('bounty.json'))
-
-
-def test_get_schema_name_matches_file():
-    # arrange
-    # act
-    path, name = Bounty.get_schema()
-    # assert
-    assert name == "bounty"
+from polyswarmartifact.schema.bounty import Bounty
 
 
 def test_valid_blob_validates_true():
@@ -148,9 +130,3 @@ def test_builder_256_scanners_is_valid():
                                  md5="md5")
     # assert
     assert Bounty.validate(json.loads(bounty.json()))
-
-
-def test_validate_bad_file():
-    Bounty.get_schema = lambda : ('/fake', 'bounty')
-    with pytest.raises(FileNotFoundError):
-        Bounty.validate({})

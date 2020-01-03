@@ -19,6 +19,7 @@ variables:
 # Test Stage
 ###############################################################
 test-py36:
+  image: python:3.6
   stage: test
   tags:
     - kube

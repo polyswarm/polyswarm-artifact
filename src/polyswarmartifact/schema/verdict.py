@@ -1,8 +1,67 @@
 import json
-import os
-import pkg_resources
 
 from .schema import Schema
+
+VERDICT_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "verdict",
+    "type": "object",
+    "properties": {
+        "malware_family": {"type": "string"},
+        "domains": {
+            "type": ["array", "null"],
+            "items": {
+                "type": "string",
+                "format": "uri"
+            },
+            "minItems": 0
+        },
+        "ip_addresses": {
+            "type": ["array", "null"],
+            "items": {
+                "type": "string",
+                "format": "ipv4"
+            },
+            "minItems": 0
+        },
+        "stix_signatures": {
+            "type": ["array", "null"],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "schema": {"type": ["string", "null"]},
+                    "signature": {"type": ["object", "string", "null"]}
+                },
+                "additionalItems": True
+            }
+        },
+        "scanner": {
+            "type": ["object", "null"],
+            "properties": {
+                "version": {
+                    "type": ["string", "null"],
+                    "pattern": "^\\d+\\.\\d+\\.\\d+$"
+                },
+                "polyswarmclient_version": {
+                    "type": ["string", "null"],
+                    "pattern": "^\\d+\\.\\d+\\.\\d+$"
+                },
+                "vendor_version": {"type": ["string", "null"]},
+                "signatures_version": {"type": ["string", "null"]},
+                "environment": {
+                    "type": ["object", "null"],
+                    "properties": {
+                        "operating_system": {"type": ["string", "null"]},
+                        "architecture": {"type": ["string", "null"]}
+                    }
+                }
+            },
+            "additionalItems": True
+        }
+    },
+    "additionalItems": True,
+    "required": ["malware_family"]
+}
 
 
 class Verdict(Schema):
@@ -81,7 +140,7 @@ class Verdict(Schema):
         :return: Tuple[string, string] where first string is the path,
         and the second is the schema name
         """
-        return pkg_resources.resource_filename(__name__, os.path.join('verdict.json')), 'verdict'
+        return VERDICT_SCHEMA
 
     def json(self):
         """

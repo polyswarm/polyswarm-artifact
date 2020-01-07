@@ -19,9 +19,12 @@ variables:
 # Test Stage
 ###############################################################
 test-py36:
+  image: python:3.6
   stage: test
   tags:
     - kube
+  before_script:
+    - pip3 install tox
   script:
     - tox -e py36
   except:

@@ -1,4 +1,4 @@
 from .artifact_type import ArtifactType
 from .exceptions import PolyswarmArtifactException, DecodeError
 
-__version__ = '1.3.1'
+__version__ = '1.3.2'

@@ -1,29 +1,10 @@
 import json
 import logging
-import os
-
-import pkg_resources
 import pytest
 
-from polyswarmartifact.schema.verdict import Verdict, __name__ as verdict_name
+from polyswarmartifact.schema.verdict import Verdict
 
 logger = logging.getLogger(__name__)
-
-
-def test_get_schema_path():
-    # arrange
-    path, name = Verdict.get_schema()
-    # act
-    # assert
-    assert path == pkg_resources.resource_filename(verdict_name, os.path.join('verdict.json'))
-
-
-def test_get_schema_name():
-    # arrange
-    path, name = Verdict.get_schema()
-    # act
-    # assert
-    assert name == "verdict"
 
 
 def test_empty_verdict():

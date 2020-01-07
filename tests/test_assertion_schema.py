@@ -1,26 +1,8 @@
-import os
 import json
 
-import pkg_resources
 import pytest
-from polyswarmartifact.schema.assertion import Assertion, __name__ as assertion_name
+from polyswarmartifact.schema.assertion import Assertion
 from polyswarmartifact.schema.verdict import Verdict
-
-
-def test_get_schema_path_is_valid_file():
-    # arrange
-    # act
-    path, name = Assertion.get_schema()
-    # assert
-    assert path == pkg_resources.resource_filename(assertion_name, os.path.join('assertion.json'))
-
-
-def test_get_schema_name_matches_file():
-    # arrange
-    # act
-    path, name = Assertion.get_schema()
-    # assert
-    assert name == "assertion"
 
 
 def test_valid_blob_validates_true():

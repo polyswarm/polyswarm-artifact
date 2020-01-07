@@ -1,9 +1,19 @@
 import json
 import os
 import pkg_resources
+from jsonschema import RefResolver
 
 from .schema import Schema
-from .verdict import VerdictEncoder
+from .verdict import VerdictEncoder, VERDICT_SCHEMA
+
+ASSERTION_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "assertion",
+    "type": "array",
+    "minItems": 1,
+    "maxItems": 256,
+    "items": {"$ref": "verdict"}
+}
 
 
 class Assertion(Schema):
@@ -25,10 +35,12 @@ class Assertion(Schema):
         :return: Tuple[string, string] where first string is the path,
         and the second is the schema name
         """
-        return (
-            pkg_resources.resource_filename(__name__, os.path.join('assertion.json')),
-            'assertion'
-        )
+        return ASSERTION_SCHEMA
+
+    @classmethod
+    def validate(cls, value, resolver=None, silent=False):
+        resolver = RefResolver.from_schema(VERDICT_SCHEMA)
+        return super().validate(value, resolver, silent)
 
     def json(self):
         """

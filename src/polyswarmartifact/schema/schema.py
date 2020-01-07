@@ -1,9 +1,7 @@
-import json
 import logging
-import os
 
 from abc import ABC, abstractmethod
-from jsonschema import validate, RefResolver, ValidationError
+from jsonschema import validate, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -36,16 +34,7 @@ class Schema(ABC):
         :param silent: Silence exception if silent is True
         :return: Boolean, True if JSON matches the schema
         """
-        schema_path, schema_name = cls.get_schema()
-        if not os.path.exists(schema_path):
-            raise FileNotFoundError('Cannot find schema_path: {schema_path}'.format(schema_path=schema_path))
-
-        with open(schema_path) as f:
-            schema = json.loads(f.read())
-
-        if resolver is None:
-            resolver = RefResolver('file://{schema_path}'.format(schema_path=schema_path), schema_name)
-
+        schema = cls.get_schema()
         try:
             validate(instance=value, schema=schema, resolver=resolver)
         except ValidationError:

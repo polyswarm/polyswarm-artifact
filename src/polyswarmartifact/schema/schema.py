@@ -6,7 +6,7 @@ from jsonschema import validate, ValidationError
 logger = logging.getLogger(__name__)
 
 
-class Schema(ABC):
+class Schema(ABC, BaseModel):
     @classmethod
     @abstractmethod
     def get_schema(cls):

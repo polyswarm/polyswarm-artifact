@@ -18,7 +18,7 @@ setup(
     license='MIT',
     python_requires='>=3.5.2,<4',
     install_requires=[
-        'jsonschema==3.0.1'
+        'jsonschema==3.0.2'
     ],
     include_package_data=True,
     packages=find_packages('src'),

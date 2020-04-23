@@ -79,7 +79,7 @@ rebuild-polyswarm-models:
     - master
   trigger: externalci/polyswarm-models
 
-rebuild-polyswarmd-transaction:
+rebuild-polyswarm-transaction:
   stage: trigger
   only:
     - master

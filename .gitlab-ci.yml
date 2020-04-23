@@ -73,7 +73,13 @@ release:
 # Trigger other CI builds
 ###############################################################
 
-rebuild-polyswarmd-fast:
+rebuild-polyswarm-models:
+  stage: trigger
+  only:
+    - master
+  trigger: externalci/polyswarm-models
+
+rebuild-polyswarmd-transaction:
   stage: trigger
   only:
     - master

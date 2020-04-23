@@ -78,6 +78,8 @@ rebuild-polyswarm-models:
   only:
     - master
   trigger: externalci/polyswarm-models
+  variables:
+    BASE_IMAGE_NAME: polyswarm-models
 
 rebuild-polyswarm-transaction:
   stage: trigger

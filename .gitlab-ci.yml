@@ -84,3 +84,5 @@ rebuild-polyswarm-transaction:
   only:
     - master
   trigger: externalci/polyswarm-transaction
+  variables:
+    BASE_IMAGE_NAME: polyswarm-transaction

@@ -1,141 +1,46 @@
-import json
+from typing import Optional, Union
 
-from jsonschema import RefResolver
+from pydantic import AnyUrl, conlist, constr, PositiveInt
 
 from .schema import Schema
 
-BOUNTY_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "bounty",
-    "definitions": {
-        "file": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "filename": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "filesize": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "mimetype": {
-                        "type": "string"
-                    },
-                    "sha256": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "sha1": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    },
-                    "md5": {
-                        "type": [
-                            "string",
-                            "null"
-                        ]
-                    }
-                },
-                "additionalProperties": True,
-                "required": [
-                    "mimetype"
-                ]
-            }
-        },
-        "url": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "protocol": {"type": "string"}
-                },
-                "additionalProperties": True,
-                "required": ["protocol"]
-            }
-        }
-    },
-    "type": "array",
-    "oneOf": [
-            {
-                "$ref": "#/definitions/file"
-            },
-            {
-                "$ref": "#/definitions/url"
-            }
-        ]
-}
+MD5 = constr(min_length=32, max_length=32)
+SHA1 = constr(min_length=40, max_length=40)
+SHA256 = constr(min_length=64, max_length=64)
+
+
+class FileArtifact(Schema):
+    filename: Optional[str] = None
+    filesize: Optional[PositiveInt] = None
+    mimetype: str
+    sha256: Optional[SHA256] = None
+    sha1: Optional[SHA1] = None
+    md5: Optional[MD5] = None
+
+
+class URLArtifact(Schema):
+    uri: AnyUrl
+
+    def dict(self, *args, **kwargs):
+        o = super().dict(*args, **kwargs)
+        uri = o['uri']
+        return {'protocol': f'{uri.scheme}://', 'uri': uri}
 
 
 class Bounty(Schema):
-    def __init__(self, ):
-        self.artifacts = []
+    __root__: conlist(Union[FileArtifact, URLArtifact], min_items=1, max_items=256) = []
 
-    def add_file_artifact(self, mimetype, filename=None, filesize=None, sha256=None, sha1=None, md5=None):
-        if mimetype is None:
-            raise ValueError("Mimetype cannot be None")
-        artifact = {
-            "mimetype": mimetype,
-        }
-        if filename is not None:
-            artifact['filename'] = filename
+    @property
+    def artifacts(self):
+        return self.__root__
 
-        if filesize is not None:
-            artifact['filesize'] = filesize
-
-        if sha256 is not None:
-            artifact['sha256'] = sha256
-
-        if sha1 is not None:
-            artifact['sha1'] = sha1
-
-        if md5 is not None:
-            artifact['md5'] = md5
-
-        self.artifacts.append(artifact)
+    def add_file_artifact(self, **kwargs):
+        self.artifacts.append(FileArtifact(**kwargs))
         return self
 
-    def add_url_artifact(self, *_args, **kwargs):
-        self.artifacts.append({**kwargs})
+    def add_url_artifact(self, uri=None, protocol=None):
+        if protocol is not None:
+            proto, *_ = protocol.rsplit(':/', 1)
+            uri = f'{proto}://{uri}'
+        self.artifacts.append(URLArtifact(uri=uri))
         return self
-
-    @classmethod
-    def get_schema(cls):
-        """
-        Get the path to the backing schema this Metadata object users
-        :return: Tuple[string, string] where first string is the path,
-        and the second is the schema name
-        """
-        return BOUNTY_SCHEMA
-
-    def json(self):
-        """
-        Convert metadata implementation into json string
-        :return: JSON string representing the internal type of this object
-        """
-        output = BountyEncoder().encode(self)
-        if not Bounty.validate(json.loads(output)):
-            raise ValueError('Invalid Bounty setup')
-
-        return output
-
-    @classmethod
-    def validate(cls, value, resolver=None, silent=False):
-        resolver = RefResolver.from_schema(BOUNTY_SCHEMA)
-        return super().validate(value, resolver, silent)
-
-
-class BountyEncoder(json.JSONEncoder):
-    def encode(self, obj):
-        if isinstance(obj, Bounty):
-            return json.dumps([artifact for artifact in obj.artifacts])

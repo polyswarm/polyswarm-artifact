@@ -1,3 +1,5 @@
+from typing import List
+
 from pydantic import conlist
 
 from .schema import Schema
@@ -15,6 +17,7 @@ class Assertion(Schema):
         self.__root__.append(verdict)
         return self
 
-    def add_artifacts(self, verdict: Verdict):
-        self.__root__.extend(verdict)
+    def add_artifacts(self, verdicts: List[Verdict]):
+        for verdict in verdicts:
+            self.add_artifact(verdict)
         return self

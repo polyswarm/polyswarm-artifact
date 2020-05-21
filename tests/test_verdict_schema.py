@@ -147,7 +147,6 @@ def test_validate_two_ip_at_once():
     assert Verdict.validate(json.loads(verdict.json()))
 
 
-@pytest.mark.skip
 def test_validate_ip_invalid():
     # arrange
     verdict = Verdict()

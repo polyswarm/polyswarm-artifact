@@ -1,21 +1,17 @@
-from typing import Optional, Union
+from typing import Mapping, Optional, Union
 
-from pydantic import AnyUrl, conlist, constr, PositiveInt
+from pydantic import AnyUrl, PositiveInt, conlist, validator
 
-from .schema import Schema
-
-MD5 = constr(min_length=32, max_length=32)
-SHA1 = constr(min_length=40, max_length=40)
-SHA256 = constr(min_length=64, max_length=64)
+from .schema import Md5, Schema, Sha1, Sha256
 
 
 class FileArtifact(Schema):
     filename: Optional[str] = None
     filesize: Optional[PositiveInt] = None
     mimetype: str
-    sha256: Optional[SHA256] = None
-    sha1: Optional[SHA1] = None
-    md5: Optional[MD5] = None
+    sha256: Optional[Sha256] = None
+    sha1: Optional[Sha1] = None
+    md5: Optional[Md5] = None
 
 
 class URLArtifact(Schema):
@@ -27,8 +23,22 @@ class URLArtifact(Schema):
         return {'protocol': f'{uri.scheme}://', 'uri': uri}
 
 
+def distinguish(artifact: Mapping):
+    for m in [FileArtifact, URLArtifact]:
+        if any(f in artifact for f in m.__fields__):
+            return m(**artifact)
+    return artifact
+
+
 class Bounty(Schema):
     __root__: conlist(Union[FileArtifact, URLArtifact], min_items=1, max_items=256) = []
+
+    @validator('__root__', pre=True)
+    def distinguish(cls, vs):
+        if len(vs) > 0 and len(vs) < 256:
+            return list(map(distinguish, vs))
+        else:
+            raise ValueError
 
     @property
     def artifacts(self):
@@ -44,3 +54,6 @@ class Bounty(Schema):
             uri = f'{proto}://{uri}'
         self.artifacts.append(URLArtifact(uri=uri))
         return self
+
+    class Config:
+        validate_assignment = True

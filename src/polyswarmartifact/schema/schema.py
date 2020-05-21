@@ -1,9 +1,13 @@
 import logging
-from typing import Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, constr
 
 logger = logging.getLogger(__name__)
+
+Md5 = constr(regex='^[0-9a-fA-F]{32}$')
+Sha1 = constr(regex='^[0-9a-fA-F]{40}$')
+Sha256 = constr(regex='^[0-9a-fA-F]{64}$')
+
 
 class Schema(BaseModel):
     @classmethod
@@ -21,13 +25,6 @@ class Schema(BaseModel):
         else:
             return super().__eq__(other)
 
-    @classmethod
-    def validate(cls, value):
-        try:
-            if isinstance(value, list):
-                return cls.parse_obj(value)
-            else:
-                return BaseModel.validate(value)
-
-        except pydantic.errors.DictError:
-            raise ValueError
+    def json(self, *args, **kwargs):
+        self.parse_obj(self.dict())
+        return super().json(*args, **kwargs)

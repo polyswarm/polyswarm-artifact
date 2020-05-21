@@ -1,10 +1,11 @@
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, IPvAnyAddress, constr
+from pydantic import Field, IPvAnyAddress, constr, validator
 
 from .schema import Schema
 
 VersionStr = constr(regex=r"^[0-9]+([.][0-9]+)*$")
+
 
 class Scanner(Schema):
     version: Optional[VersionStr] = None
@@ -15,16 +16,30 @@ class Scanner(Schema):
 
 
 class StixSignature(Schema):
-    stix_schema: str
-    signature: str
+    json_schema: str = Field(alias='schema')
+    signature: Any
+
+    def __getitem__(self, k):
+        if k == 'schema':
+            return self.json_schema
+        return getattr(self, k)
+
+    def dict(self, **kwargs):
+        return super().dict(**{**kwargs, 'by_alias': True})
 
 
 class Verdict(Schema):
     malware_family: str = None
-    domains: List[str] = []
-    ip_addresses: List[IPvAnyAddress] = []
-    stix: List[StixSignature] = []
+    domains: Optional[List[str]] = []
+    ip_addresses: Optional[List[IPvAnyAddress]] = []
+    stix: Optional[List[StixSignature]] = []
     scanner: Optional[Scanner] = None
+
+    @validator('scanner', pre=True)
+    def _allow_empty_dict(cls, v):
+        if not v:
+            return None
+        return v
 
     @property
     def extra(self):
@@ -44,7 +59,7 @@ class Verdict(Schema):
 
     def add_extras(self, extras):
         for k, v in extras:
-            setattr(self, k, v)
+            self.add_extra(k, v)
         return self
 
     def add_ip_address(self, ip_address):
@@ -52,11 +67,12 @@ class Verdict(Schema):
         return self
 
     def add_ip_addresses(self, ip_addresses):
-        self.ip_addresses.extend(ip_addresses)
+        for ip in ip_addresses:
+            self.add_ip_address(ip)
         return self
 
     def add_stix_signature(self, schema, signature):
-        self.stix.append({'schema': schema, 'signature': signature})
+        self.stix.append(StixSignature(schema=schema, signature=signature))
         return self
 
     def add_stix_signatures(self, signatures):

@@ -17,7 +17,6 @@ def test_valid_blob_validates_true():
     assert result
 
 
-@pytest.mark.skip
 def test_invalid_scanner_validates_false():
     # arrange
     blob = [
@@ -25,10 +24,9 @@ def test_invalid_scanner_validates_false():
             "filesize": "1",
         }
     ]
-    # act
-    result = Bounty.validate(blob)
-    # assert
-    assert not result
+    with pytest.raises(ValueError):
+        # act
+        result = Bounty.validate(blob)
 
 
 def test_add_file_artifact():
@@ -90,7 +88,6 @@ def test_add_full_artifact():
     assert bounty.artifacts and bounty.artifacts[0].dict() == artifact
 
 
-@pytest.mark.skip
 def test_builder_no_artifacts_empty_list():
     # arrange
     bounty = Bounty()

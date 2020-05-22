@@ -1,36 +1,41 @@
-from typing import Any, Dict, List, Optional
+import itertools
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from pydantic import Field, IPvAnyAddress, constr, validator
+from pydantic import Field, IPvAnyAddress, validator
 
-from .schema import Schema
+from .schema import Domain, Schema, VersionStr, chainable
 
-VersionStr = constr(regex=r"^[0-9]+([.][0-9]+)*$")
+
+def starmap(fn, iterable):
+    return tuple(itertools.starmap(fn, iterable))
 
 
 class Scanner(Schema):
     version: Optional[VersionStr] = None
-    polyswarmclient_version: Optional[VersionStr] = None
+    polyswarmclient_version: Optional[VersionStr] = Field(
+        title='polyswarmclient package version', default=None
+    )
     vendor_version: Optional[str] = None
-    signatures_version: Optional[str] = None
-    environment: Optional[Dict] = None
+    signatures_version: Optional[str] = Field(title='Engine signature version', default=None)
+    environment: Optional[Dict[str, Optional[str]]] = Field(title='Analysis environment', default=None)
 
 
 class StixSignature(Schema):
-    json_schema: str = Field(alias='schema')
-    signature: Any
+    stix_schema: str = Field(alias='schema')
+    signature: Any  # what does this mean?
 
     def __getitem__(self, k):
         if k == 'schema':
-            return self.json_schema
+            return self.stix_schema
         return getattr(self, k)
 
-    def dict(self, **kwargs):
-        return super().dict(**{**kwargs, 'by_alias': True})
+    def dict(self, *args, **kwargs):
+        return super().dict(*args, **{**kwargs, 'by_alias': True})
 
 
 class Verdict(Schema):
     malware_family: str = None
-    domains: Optional[List[str]] = []
+    domains: Optional[List[Domain]] = []
     ip_addresses: Optional[List[IPvAnyAddress]] = []
     stix: Optional[List[StixSignature]] = []
     scanner: Optional[Scanner] = None
@@ -45,55 +50,46 @@ class Verdict(Schema):
     def extra(self):
         return [(k, v) for k, v in self.__dict__.items() if k not in self.__fields__]
 
-    def add_domain(self, domain):
+    @chainable
+    def add_domain(self, domain: Domain):
         self.domains.append(domain)
-        return self
 
-    def add_domains(self, domains):
+    @chainable
+    def add_domains(self, domains: Iterable[Domain]):
         self.domains.extend(domains)
-        return self
 
-    def add_extra(self, key, value):
-        setattr(self, key, value)
-        return self
-
-    def add_extras(self, extras):
-        for k, v in extras:
-            self.add_extra(k, v)
-        return self
-
-    def add_ip_address(self, ip_address):
-        self.ip_addresses.append(ip_address)
-        return self
-
-    def add_ip_addresses(self, ip_addresses):
-        for ip in ip_addresses:
-            self.add_ip_address(ip)
-        return self
-
-    def add_stix_signature(self, schema, signature):
-        self.stix.append(StixSignature(schema=schema, signature=signature))
-        return self
-
-    def add_stix_signatures(self, signatures):
-        for schema, signature in signatures:
-            self.add_stix_signature(schema, signature)
-        return self
-
-    def set_malware_family(self, malware_family: 'str'):
+    @chainable
+    def set_malware_family(self, malware_family: str):
         self.malware_family = malware_family
-        return self
+
+    @chainable
+    def add_extra(self, key: str, value: Any):
+        setattr(self, key, value)
+
+    @chainable
+    def add_extras(self, extras: Iterable[Tuple[str, Any]]):
+        return starmap(self.add_extra, extras)
+
+    @chainable
+    def add_ip_address(self, ip_address: IPvAnyAddress):
+        self.ip_addresses.append(str(ip_address))
+
+    @chainable
+    def add_ip_addresses(self, ip_addresses: Iterable[IPvAnyAddress]):
+        self.ip_addresses.extend(map(str, ip_addresses))
+
+    @chainable
+    def add_stix_signature(self, stix_schema: str, signature: Any):
+        self.stix.append(StixSignature(schema=stix_schema, signature=signature))
+
+    @chainable
+    def add_stix_signatures(self, signatures: Iterable[Tuple[str, Any]]):
+        return starmap(self.add_stix_signature, signatures)
 
     def set_scanner(self, **scanner):
-        if 'operating_system' in scanner or 'architecture' in scanner:
-            scanner["environment"] = {
-                "operating_system": scanner.get("operating_system"),
-                "architecture": scanner.get('architecture')
-            }
-            for k, v in scanner['environment'].items():
-                if v is None:
-                    del k
-
+        environment = {k: scanner.pop(k, None) for k in ('architecture', 'operating_system')}
+        if any(environment.values()):
+            scanner['environment'] = environment
         self.scanner = Scanner(**scanner)
         return self
 

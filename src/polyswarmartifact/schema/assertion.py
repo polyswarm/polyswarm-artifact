@@ -1,23 +1,22 @@
 from typing import List
 
-from pydantic import conlist
+from pydantic import Field
 
-from .schema import Schema
+from .schema import Schema, chainable
 from .verdict import Verdict
 
 
 class Assertion(Schema):
-    __root__: conlist(Verdict, min_items=1, max_items=256) = []
+    __root__: List[Verdict] = Field(min_items=1, max_items=256, default=[])
 
     @property
     def artifacts(self):
         return self.__root__
 
+    @chainable
     def add_artifact(self, verdict: Verdict):
         self.__root__.append(verdict)
-        return self
 
+    @chainable
     def add_artifacts(self, verdicts: List[Verdict]):
-        for verdict in verdicts:
-            self.add_artifact(verdict)
-        return self
+        self.__root__.extend(verdicts)

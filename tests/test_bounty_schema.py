@@ -68,6 +68,18 @@ def test_add_both_artifact():
     with pytest.raises(ValueError):
         bounty.json()
 
+def test_add_both_artifact_new():
+    # arrange
+    bounty = Bounty()
+
+    with pytest.raises(ValueError):
+        # act
+        bounty.add_url_artifact(protocol="https://")
+        bounty.add_file_artifact(mimetype="test")
+        # assert
+        bounty.json()
+
+
 
 def test_add_full_artifact():
     # arrange

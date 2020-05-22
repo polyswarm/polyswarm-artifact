@@ -1,6 +1,13 @@
 from typing import List, Optional, Union
 
-from pydantic import AnyUrl, Field, PositiveInt, validator, StrictStr
+from pydantic import (
+    AnyUrl,
+    Field,
+    PositiveInt,
+    StrictStr,
+    validate_arguments,
+    validator,
+)
 
 from .schema import MD5, SHA1, SHA256, Schema
 
@@ -10,7 +17,7 @@ class FileArtifact(Schema):
     filesize: Optional[PositiveInt] = Field(
         description='specifies the size of the artifact in bytes', default=None
     )
-    mimetype: StrictStr = Field(description='indicates the type of media this file represents')
+    mimetype: StrictStr = Field(description='indicates the type of media this file represents', default=-1)
     sha256: Optional[SHA256] = Field(title='SHA256', default=None)
     sha1: Optional[SHA1] = Field(title='SHA1', default=None)
     md5: Optional[MD5] = Field(title='MD5', default=None)
@@ -39,7 +46,8 @@ class Bounty(Schema):
         self.__root__.append(FileArtifact(**kwargs))
         return self
 
-    def add_url_artifact(self, uri: str, protocol: Optional[str] = None):
+    @validate_arguments
+    def add_url_artifact(self, uri: StrictStr, protocol: str = None):
         if protocol is not None:
             proto, *_ = protocol.rsplit('://', 1)
             uri = '{}://{}'.format(proto, next(reversed(uri.split('://', 1))))

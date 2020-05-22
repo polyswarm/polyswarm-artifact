@@ -12,7 +12,7 @@ from typing import (
     cast,
 )
 
-from pydantic import BaseModel, constr, validator
+from pydantic import BaseModel, ValidationError, constr, validate_arguments
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ def chainable(fn: Callable):
     """
     Decorator to validate the arguments passed to a function, returning self
     """
-    # @validate_arguments
+    @validate_arguments
     @functools.wraps(fn)
     def setter_wrapper(self, *args: Any, **kwargs: Any) -> Any:
         fn(self, *args, **kwargs)
@@ -43,38 +43,7 @@ def chainable(fn: Callable):
     return cast('Callable', setter_wrapper)
 
 
-class SchemaMeta(type(BaseModel)):
-    def __new__(cls, name, bases, namespace, **kwargs):  # noqa C901
-        annotations = namespace.get('__annotations__')
-
-        # the code below ensures only valid items are added to the container
-        if isinstance(annotations, Mapping) and '__root__' in annotations:
-            # Collect all this type can contain
-            models = annotations['__root__'].__args__
-            if hasattr(models[0], '__args__'):
-                models = models[0].__args__
-
-            # map of each model to it's field names
-            fields = {m: set(m.__fields__) for m in models}
-            # create a set of all unique field names to ensure we don't check a field name which
-            # shadows an existing name.
-            unique = functools.reduce(lambda a, b: a ^ b, fields.values(), set())
-            fields = {m: f & unique for m, f in fields.items()}
-
-            @validator('__root__', pre=True, allow_reuse=True)
-            def specialize_members(cls, members):  # noqa
-                "Ensure new members to this container object are valid"
-                for obj in members:
-                    for m, fields in fields.items():
-                        if any(fields & obj.__fields__):
-                            yield m.parse_obj(obj)
-                        else:
-                            raise ValueError
-
-        return super().__new__(cls, name, bases, namespace, **kwargs)
-
-
-class Schema(BaseModel, metaclass=SchemaMeta):
+class Schema(BaseModel):
     @classmethod
     def get_schema(cls):
         """
@@ -95,26 +64,20 @@ class Schema(BaseModel, metaclass=SchemaMeta):
         return super().dict(*args, **kwargs)
 
     @classmethod
-    def validate(cls: Type['Model'], value: Any) -> 'Model':
+    def validate(cls: Type['Schema'], value: Any) -> 'Union[Schema, bool]':
         try:
             return BaseModel.validate.__func__(cls, value).revalidate()
-        except ValueError:
+        except ValidationError:
             return False
 
-    def revalidate(self) -> 'Model':
+    def revalidate(self) -> 'Schema':
         """Run all field validations on existing model"""
-        ### FIXME: this code is kinda a mess, either remove it by verifying callers don't depend on
-        ### it and `json` or figure out something clearer
-
-        # handle container validation
-        if hasattr(self, '__root__'):
-            if any(not hasattr(v, 'validate') or not v.validate(v) for v in self.__root__):
-                raise ValueError
-
-        # and manually validate each field now
-        for k, v in self.__fields__.items():
-            _, err = v.validate(getattr(self, k), self.__fields__, loc=k)
+        errors = []
+        fields = self.__fields__
+        for k, v in fields.items():
+            _, err = v.validate(getattr(self, k), fields, loc=k)
             if err:
-                raise ValueError
-
+                errors.append(err)
+        if errors:
+            raise ValidationError(errors, self.__class__)
         return self

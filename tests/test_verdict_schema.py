@@ -148,10 +148,10 @@ def test_validate_two_ip_at_once():
 def test_validate_ip_invalid():
     # arrange
     verdict = Verdict()
-    # act
-    verdict.add_ip_address('asdf')
     # assert
     with pytest.raises(ValueError):
+        # act
+        verdict.add_ip_address('asdf')
         verdict.json()
 
 

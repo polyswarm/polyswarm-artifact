@@ -1,8 +1,7 @@
 import itertools
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from pydantic import Field, IPvAnyAddress, validator, StrictStr
-from pydantic.errors import DictError
+from pydantic import Field, IPvAnyAddress, StrictStr, validator
 
 from .schema import Domain, Schema, VersionStr, chainable
 
@@ -25,9 +24,11 @@ class StixSignature(Schema):
     stix_schema: str = Field(alias='schema')
     signature: Any  # what does this mean?
 
+    @property
+    def schema(self):
+        return self.stix_schema
+
     def __getitem__(self, k):
-        if k == 'schema':
-            return self.stix_schema
         return getattr(self, k)
 
     def dict(self, *args, **kwargs):
@@ -36,16 +37,10 @@ class StixSignature(Schema):
 
 class Verdict(Schema):
     malware_family: StrictStr = Field(default=-1)
-    domains: Optional[List[Domain]] = Field(default_factory=list)
-    ip_addresses: Optional[List[IPvAnyAddress]] = Field(default_factory=list)
-    stix: Optional[List[StixSignature]] = Field(default_factory=list)
+    domains: Optional[List[Domain]] = Field(default=list())
+    ip_addresses: Optional[List[IPvAnyAddress]] = Field(default=list())
+    stix: Optional[List[StixSignature]] = Field(default=list())
     scanner: Optional[Scanner] = Field(default=None)
-
-    @validator('scanner', pre=True)
-    def _allow_empty_dict(cls, v):
-        if not v:
-            return None
-        return v
 
     @property
     def extra(self):

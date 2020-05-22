@@ -90,32 +90,31 @@ class Schema(BaseModel, metaclass=SchemaMeta):
         else:
             return super().__eq__(other)
 
-    def json(self, *args, **kwargs):
-        if type(self).validate(self):
-            return super().json(*args, **kwargs)
-        else:
-            raise ValueError
+    def dict(self, *args, **kwargs):
+        self.revalidate()
+        return super().dict(*args, **kwargs)
 
     @classmethod
     def validate(cls: Type['Model'], value: Any) -> 'Model':
-        ### FIXME: this code is a total mess, either remove it by verifying callers don't depend on
-        ### it and `json` or figure out something clearer
         try:
-            o = BaseModel.validate.__func__(cls, value)
-            if hasattr(o, '__root__'):
-                try:
-                    if len(o.__root__) == 0 or not all(v.validate(v) for v in o.__root__):
-                        raise ValueError
-                except AttributeError:
-                    raise ValueError
-            else:
-                if len(o.__fields_set__) == 0:
-                    raise ValueError
-                for k, v in o.__fields__.items():
-                    fv = getattr(o, k)
-                    _, err = v.validate(fv, o.__fields__, loc=k)
-                    if err:
-                        raise ValueError
-            return o
+            return BaseModel.validate.__func__(cls, value).revalidate()
         except ValueError:
             return False
+
+    def revalidate(self) -> 'Model':
+        """Run all field validations on existing model"""
+        ### FIXME: this code is kinda a mess, either remove it by verifying callers don't depend on
+        ### it and `json` or figure out something clearer
+
+        # handle container validation
+        if hasattr(self, '__root__'):
+            if any(not hasattr(v, 'validate') or not v.validate(v) for v in self.__root__):
+                raise ValueError
+
+        # and manually validate each field now
+        for k, v in self.__fields__.items():
+            _, err = v.validate(getattr(self, k), self.__fields__, loc=k)
+            if err:
+                raise ValueError
+
+        return self

@@ -20,7 +20,7 @@ MD5 = constr(regex='^[0-9a-fA-F]{32}$', min_length=32, max_length=32)
 SHA1 = constr(regex='^[0-9a-fA-F]{40}$', min_length=40, max_length=40)
 SHA256 = constr(regex='^[0-9a-fA-F]{64}$', min_length=64, max_length=64)
 Domain = constr(
-    regex='(?:{int_chunk}\.)*?{int_chunk}{int_domain_ending}'.format(
+    regex=r'(?:{int_chunk}\.)*?{int_chunk}{int_domain_ending}'.format(
         int_chunk=r'[_0-9a-\U00040000](?:[-_0-9a-\U00040000]{0,61}[_0-9a-\U00040000])?',
         int_domain_ending=r'(?P<tld>(\.[^\W\d_]{2,63})|(\.(?:xn--)[_0-9a-z-]{2,63}))?\.?',
     ),
@@ -98,11 +98,24 @@ class Schema(BaseModel, metaclass=SchemaMeta):
 
     @classmethod
     def validate(cls: Type['Model'], value: Any) -> 'Model':
+        ### FIXME: this code is a total mess, either remove it by verifying callers don't depend on
+        ### it and `json` or figure out something clearer
         try:
             o = BaseModel.validate.__func__(cls, value)
             if hasattr(o, '__root__'):
-                if len(o.__root__) == 0 or not all(len(getattr(v, '__fields_set__', ())) for v in o.__root__):
+                try:
+                    if len(o.__root__) == 0 or not all(v.validate(v) for v in o.__root__):
+                        raise ValueError
+                except AttributeError:
                     raise ValueError
+            else:
+                if len(o.__fields_set__) == 0:
+                    raise ValueError
+                for k, v in o.__fields__.items():
+                    fv = getattr(o, k)
+                    _, err = v.validate(fv, o.__fields__, loc=k)
+                    if err:
+                        raise ValueError
             return o
         except ValueError:
             return False

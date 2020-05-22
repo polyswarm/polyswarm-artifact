@@ -1,7 +1,7 @@
 import itertools
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
-from pydantic import Field, IPvAnyAddress, validator
+from pydantic import Field, IPvAnyAddress, validator, StrictStr
 from pydantic.errors import DictError
 
 from .schema import Domain, Schema, VersionStr, chainable
@@ -35,7 +35,7 @@ class StixSignature(Schema):
 
 
 class Verdict(Schema):
-    malware_family: str = Field(default=None)
+    malware_family: StrictStr = Field(default=-1)
     domains: Optional[List[Domain]] = Field(default_factory=list)
     ip_addresses: Optional[List[IPvAnyAddress]] = Field(default_factory=list)
     stix: Optional[List[StixSignature]] = Field(default_factory=list)
@@ -93,13 +93,6 @@ class Verdict(Schema):
             scanner['environment'] = environment
         self.scanner = Scanner(**scanner)
         return self
-
-    @classmethod
-    def validate(cls: Type['Model'], value: Any) -> 'Model':
-        o = Schema.validate.__func__(cls, value)
-        if not o or o.malware_family is None:
-            raise ValueError
-        return o
 
     class Config:
         extra = 'allow'

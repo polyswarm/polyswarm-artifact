@@ -1,7 +1,8 @@
 import itertools
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
 from pydantic import Field, IPvAnyAddress, validator
+from pydantic.errors import DictError
 
 from .schema import Domain, Schema, VersionStr, chainable
 
@@ -34,11 +35,11 @@ class StixSignature(Schema):
 
 
 class Verdict(Schema):
-    malware_family: str = None
-    domains: Optional[List[Domain]] = []
-    ip_addresses: Optional[List[IPvAnyAddress]] = []
-    stix: Optional[List[StixSignature]] = []
-    scanner: Optional[Scanner] = None
+    malware_family: str = Field(default=None)
+    domains: Optional[List[Domain]] = Field(default_factory=list)
+    ip_addresses: Optional[List[IPvAnyAddress]] = Field(default_factory=list)
+    stix: Optional[List[StixSignature]] = Field(default_factory=list)
+    scanner: Optional[Scanner] = Field(default=None)
 
     @validator('scanner', pre=True)
     def _allow_empty_dict(cls, v):
@@ -93,10 +94,12 @@ class Verdict(Schema):
         self.scanner = Scanner(**scanner)
         return self
 
-    def json(self, *args, **kwargs):
-        if not self.__fields_set__:
+    @classmethod
+    def validate(cls: Type['Model'], value: Any) -> 'Model':
+        o = Schema.validate.__func__(cls, value)
+        if not o or o.malware_family is None:
             raise ValueError
-        return super().json(*args, **kwargs)
+        return o
 
     class Config:
         extra = 'allow'

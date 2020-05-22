@@ -18,8 +18,6 @@ def test_valid_blob_validates_true():
     assert result
 
 
-# THIS IS ACTUALLY VALID?
-@pytest.mark.skip
 def test_invalid_scanner_validates_false():
     # arrange
     blob = [

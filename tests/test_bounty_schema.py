@@ -24,9 +24,10 @@ def test_invalid_scanner_validates_false():
             "filesize": "1",
         }
     ]
-    with pytest.raises(ValueError):
-        # act
-        result = Bounty.validate(blob)
+    # act
+    result = Bounty.validate(blob)
+    # assert
+    assert not result
 
 
 def test_add_file_artifact():

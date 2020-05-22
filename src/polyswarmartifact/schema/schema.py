@@ -12,7 +12,7 @@ from typing import (
     cast,
 )
 
-from pydantic import BaseModel, constr, validate_arguments, validator
+from pydantic import BaseModel, constr, validator
 
 logger = logging.getLogger(__name__)
 
@@ -59,14 +59,17 @@ class SchemaMeta(type(BaseModel)):
             # create a set of all unique field names to ensure we don't check a field name which
             # shadows an existing name.
             unique = functools.reduce(lambda a, b: a ^ b, fields.values(), set())
+            fields = {m: f & unique for m, f in fields.items()}
 
             @validator('__root__', pre=True, allow_reuse=True)
             def specialize_members(cls, members):  # noqa
                 "Ensure new members to this container object are valid"
                 for obj in members:
                     for m, fields in fields.items():
-                        if fields & unique & obj.__fields__:
+                        if any(fields & obj.__fields__):
                             yield m.parse_obj(obj)
+                        else:
+                            raise ValueError
 
         return super().__new__(cls, name, bases, namespace, **kwargs)
 
@@ -88,8 +91,18 @@ class Schema(BaseModel, metaclass=SchemaMeta):
             return super().__eq__(other)
 
     def json(self, *args, **kwargs):
-        if hasattr(self, '__root__'):
-            if not all(getattr(v, '__fields_set__', None) for v in self.__root__):
-                raise ValueError
-        self.parse_obj(self.dict(exclude_defaults=True))
-        return super().json(*args, **kwargs)
+        if type(self).validate(self):
+            return super().json(*args, **kwargs)
+        else:
+            raise ValueError
+
+    @classmethod
+    def validate(cls: Type['Model'], value: Any) -> 'Model':
+        try:
+            o = BaseModel.validate.__func__(cls, value)
+            if hasattr(o, '__root__'):
+                if len(o.__root__) == 0 or not all(len(getattr(v, '__fields_set__', ())) for v in o.__root__):
+                    raise ValueError
+            return o
+        except ValueError:
+            return False

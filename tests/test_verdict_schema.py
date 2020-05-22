@@ -7,7 +7,6 @@ from polyswarmartifact.schema.verdict import Verdict
 logger = logging.getLogger(__name__)
 
 
-@pytest.mark.skip
 def test_empty_verdict():
     # arrange
     verdict = Verdict()
@@ -36,7 +35,6 @@ def test_reset_malware_family():
     assert verdict.malware_family == "Trojan"
 
 
-@pytest.mark.skip
 def test_validate_no_familty():
     # arrange
     verdict = Verdict()

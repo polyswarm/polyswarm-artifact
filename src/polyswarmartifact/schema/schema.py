@@ -13,7 +13,6 @@ from typing import (
 )
 
 from pydantic import BaseModel, constr, validate_arguments, validator
-from pydantic.decorator import ValidatedFunction
 
 logger = logging.getLogger(__name__)
 
@@ -35,36 +34,35 @@ def chainable(fn: Callable):
     """
     Decorator to validate the arguments passed to a function, returning self
     """
-    vd = ValidatedFunction(fn)
-
+    # @validate_arguments
     @functools.wraps(fn)
-    def setter_wrapper(*args: Any, **kwargs: Any) -> Any:
-        vd.call(*args, **kwargs)
-        return args[0]
+    def setter_wrapper(self, *args: Any, **kwargs: Any) -> Any:
+        fn(self, *args, **kwargs)
+        return self
 
-    setter_wrapper.vd = vd  # type: ignore
-    setter_wrapper.raw_function = vd.raw_function  # type: ignore
-    setter_wrapper.model = vd.model  # type: ignore
-    return cast(Callable, setter_wrapper)
+    return cast('Callable', setter_wrapper)
 
 
 class SchemaMeta(type(BaseModel)):
     def __new__(cls, name, bases, namespace, **kwargs):  # noqa C901
         annotations = namespace.get('__annotations__')
 
+        # the code below ensures only valid items are added to the container
         if isinstance(annotations, Mapping) and '__root__' in annotations:
+            # Collect all this type can contain
             models = annotations['__root__'].__args__
             if hasattr(models[0], '__args__'):
                 models = models[0].__args__
 
             # map of each model to it's field names
             fields = {m: set(m.__fields__) for m in models}
-            # create a set of all field values which are unique to their own model
+            # create a set of all unique field names to ensure we don't check a field name which
+            # shadows an existing name.
             unique = functools.reduce(lambda a, b: a ^ b, fields.values(), set())
 
             @validator('__root__', pre=True, allow_reuse=True)
             def specialize_members(cls, members):  # noqa
-                "Ensure that the field's name does not shadow an existing attribute of the model"
+                "Ensure new members to this container object are valid"
                 for obj in members:
                     for m, fields in fields.items():
                         if fields & unique & obj.__fields__:
@@ -90,5 +88,8 @@ class Schema(BaseModel, metaclass=SchemaMeta):
             return super().__eq__(other)
 
     def json(self, *args, **kwargs):
+        if hasattr(self, '__root__'):
+            if not all(getattr(v, '__fields_set__', None) for v in self.__root__):
+                raise ValueError
         self.parse_obj(self.dict(exclude_defaults=True))
         return super().json(*args, **kwargs)

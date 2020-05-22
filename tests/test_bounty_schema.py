@@ -97,14 +97,13 @@ def test_builder_no_artifacts_empty_list():
         bounty.json()
 
 
-@pytest.mark.skip
 def test_invalid_artifact_throws_value_error():
     # arrange
     # act
-    bounty = Bounty()\
-        .add_file_artifact(mimetype=0)
     # assert
     with pytest.raises(ValueError):
+        bounty = Bounty()\
+            .add_file_artifact(mimetype=0)
         bounty.json()
 
 

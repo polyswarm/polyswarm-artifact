@@ -93,5 +93,10 @@ class Verdict(Schema):
         self.scanner = Scanner(**scanner)
         return self
 
+    def json(self, *args, **kwargs):
+        if not self.__fields_set__:
+            raise ValueError
+        return super().json(*args, **kwargs)
+
     class Config:
         extra = 'allow'

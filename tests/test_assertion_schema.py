@@ -65,7 +65,6 @@ def test_builder_no_artifacts_throws_value_error():
         assertion.json()
 
 
-@pytest.mark.skip
 def test_invalid_artifact_throws_value_error():
     # arrange
     artifact = Verdict()\

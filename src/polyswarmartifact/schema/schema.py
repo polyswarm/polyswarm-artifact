@@ -9,10 +9,10 @@ from typing import (
     Set,
     Type,
     Union,
-    cast,
 )
 
-from pydantic import BaseModel, ValidationError, constr, validate_arguments
+from pydantic import BaseModel, ValidationError, constr
+# from pydantic import validate_arguments
 
 logger = logging.getLogger(__name__)
 
@@ -34,13 +34,13 @@ def chainable(fn: Callable):
     """
     Decorator to validate the arguments passed to a function, returning self
     """
-    @validate_arguments
+    # @validate_arguments
     @functools.wraps(fn)
     def setter_wrapper(self, *args: Any, **kwargs: Any) -> Any:
         fn(self, *args, **kwargs)
         return self
 
-    return cast('Callable', setter_wrapper)
+    return setter_wrapper
 
 
 class Schema(BaseModel):

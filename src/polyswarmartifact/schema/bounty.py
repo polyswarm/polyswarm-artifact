@@ -5,7 +5,6 @@ from pydantic import (
     Field,
     PositiveInt,
     StrictStr,
-    validate_arguments,
     validator,
 )
 
@@ -46,8 +45,9 @@ class Bounty(Schema):
         self.__root__.append(FileArtifact(**kwargs))
         return self
 
-    @validate_arguments
-    def add_url_artifact(self, uri: StrictStr, protocol: str = None):
+    def add_url_artifact(self, uri: str = None, protocol: str = None):
+        if uri is None:
+            raise ValueError
         if protocol is not None:
             proto, *_ = protocol.rsplit('://', 1)
             uri = '{}://{}'.format(proto, next(reversed(uri.split('://', 1))))

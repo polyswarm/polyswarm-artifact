@@ -37,10 +37,11 @@ class StixSignature(Schema):
 
 class Verdict(Schema):
     malware_family: StrictStr = Field(default=-1)
-    domains: Optional[List[Domain]] = Field(default=list())
-    ip_addresses: Optional[List[IPvAnyAddress]] = Field(default=list())
-    stix: Optional[List[StixSignature]] = Field(default=list())
+    domains: Optional[List[Domain]] = Field(default_factory=list)
+    ip_addresses: Optional[List[IPvAnyAddress]] = Field(default_factory=list)
+    stix: Optional[List[StixSignature]] = Field(default_factory=list)
     scanner: Optional[Scanner] = Field(default=None)
+
 
     @property
     def extra(self):

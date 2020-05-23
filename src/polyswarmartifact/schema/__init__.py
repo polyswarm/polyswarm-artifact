@@ -1,4 +1,15 @@
-from .assertion import Assertion
-from .bounty import Bounty
 from .schema import Schema
-from .verdict import Verdict
+from .assertion import Assertion
+from .bounty import Bounty, FileArtifact, URLArtifact
+from .verdict import Verdict, Scanner, StixSignature
+
+__all__ = [
+    'Assertion',
+    'Bounty',
+    'Schema',
+    'Verdict',
+    'FileArtifact',
+    'URLArtifact',
+    'Scanner',
+    'StixSignature',
+]

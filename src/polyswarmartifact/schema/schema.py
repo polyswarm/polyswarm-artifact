@@ -8,9 +8,10 @@ from typing import (
     Sequence,
     Set,
     Type,
+    NewType,
     Union,
 )
-
+from copy import deepcopy
 from pydantic import BaseModel, ValidationError, constr
 # from pydantic import validate_arguments
 
@@ -28,6 +29,7 @@ Domain = constr(
     max_length=61 + 63 + 3
 )
 VersionStr = constr(regex=r"^[0-9]+([.][0-9]+)*$")
+Missing = object()
 
 
 def chainable(fn: Callable):
@@ -39,7 +41,6 @@ def chainable(fn: Callable):
     def setter_wrapper(self, *args: Any, **kwargs: Any) -> Any:
         fn(self, *args, **kwargs)
         return self
-
     return setter_wrapper
 
 
@@ -53,24 +54,37 @@ class Schema(BaseModel):
         """
         return cls.schema()
 
+    def __getitem__(self, k):
+        try:
+            return getattr(self, k)
+        except AttributeError:
+            raise KeyError
+
+    def __str__(self):
+        return self.json()
+
     def __eq__(self, other):
         if isinstance(other, dict):
-            return self.dict(exclude_unset=True) == other
+            return self.dict(exclude_defaults=True) == other
         else:
             return super().__eq__(other)
 
     def dict(self, *args, **kwargs):
-        self.revalidate()
+        self.check_consistency()
         return super().dict(*args, **kwargs)
+
+    def json(self, *args, **kwargs):
+        kwargs.setdefault('exclude_defaults', True)
+        return super().json(*args, **kwargs)
 
     @classmethod
     def validate(cls: Type['Schema'], value: Any) -> 'Union[Schema, bool]':
         try:
-            return BaseModel.validate.__func__(cls, value).revalidate()
+            return BaseModel.validate.__func__(cls, value).check_consistency()
         except ValidationError:
             return False
 
-    def revalidate(self) -> 'Schema':
+    def check_consistency(self) -> 'Schema':
         """Run all field validations on existing model"""
         errors = []
         fields = self.__fields__

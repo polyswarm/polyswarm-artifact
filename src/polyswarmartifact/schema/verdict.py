@@ -1,47 +1,42 @@
-import itertools
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from pydantic import Field, IPvAnyAddress, StrictStr, validator
+from pydantic import Field, IPvAnyAddress, StrictStr
 
-from .schema import Domain, Schema, VersionStr, chainable
-
-
-def starmap(fn, iterable):
-    return tuple(itertools.starmap(fn, iterable))
+from .schema import Domain, Missing, Schema, VersionStr, chainable
 
 
 class Scanner(Schema):
-    version: Optional[VersionStr] = None
-    polyswarmclient_version: Optional[VersionStr] = Field(
-        title='polyswarmclient package version', default=None
+    version: Optional[VersionStr] = Field(
+        description="version of the microengine that generated the assertion"
     )
-    vendor_version: Optional[str] = None
-    signatures_version: Optional[str] = Field(title='Engine signature version', default=None)
-    environment: Optional[Dict[str, Optional[str]]] = Field(title='Analysis environment', default=None)
+    polyswarmclient_version: Optional[VersionStr] = Field(description="version of polyswarmclient")
+    vendor_version: Optional[str] = Field(description="version of the engine that generated the assertion")
+    signatures_version: Optional[str] = Field(description="version of the engine's antimalware signatures")
+    environment: Optional[Dict[str, Any]] = Field(description="analysis environment metadata")
 
 
 class StixSignature(Schema):
     stix_schema: str = Field(alias='schema')
-    signature: Any  # what does this mean?
+    signature: Any
 
     @property
     def schema(self):
         return self.stix_schema
 
-    def __getitem__(self, k):
-        return getattr(self, k)
-
-    def dict(self, *args, **kwargs):
-        return super().dict(*args, **{**kwargs, 'by_alias': True})
+    def dict(self, **kwargs):
+        kwargs['by_alias'] = True
+        return super().dict(**kwargs)
 
 
 class Verdict(Schema):
-    malware_family: StrictStr = Field(default=-1)
-    domains: Optional[List[Domain]] = Field(default_factory=list)
-    ip_addresses: Optional[List[IPvAnyAddress]] = Field(default_factory=list)
-    stix: Optional[List[StixSignature]] = Field(default_factory=list)
-    scanner: Optional[Scanner] = Field(default=None)
-
+    malware_family: StrictStr = Field(
+        default=Missing, description='name of the malware family specified by this microengine'
+    )
+    domains: Optional[List[Domain]] = []
+    ip_addresses: Optional[List[IPvAnyAddress]] = []
+    stix: Optional[List[StixSignature]] = []
+    scanner: Optional[Scanner]
+    heuristic: Optional[bool] = Field(description='indicator for assertions generated from heuristics')
 
     @property
     def extra(self):
@@ -65,15 +60,16 @@ class Verdict(Schema):
 
     @chainable
     def add_extras(self, extras: Iterable[Tuple[str, Any]]):
-        return starmap(self.add_extra, extras)
+        for k, v in extras:
+            self.add_extra(k, v)
 
     @chainable
     def add_ip_address(self, ip_address: IPvAnyAddress):
-        self.ip_addresses.append(str(ip_address))
+        self.ip_addresses.append(ip_address)
 
     @chainable
     def add_ip_addresses(self, ip_addresses: Iterable[IPvAnyAddress]):
-        self.ip_addresses.extend(map(str, ip_addresses))
+        self.ip_addresses.extend(ip_addresses)
 
     @chainable
     def add_stix_signature(self, stix_schema: str, signature: Any):
@@ -81,12 +77,18 @@ class Verdict(Schema):
 
     @chainable
     def add_stix_signatures(self, signatures: Iterable[Tuple[str, Any]]):
-        return starmap(self.add_stix_signature, signatures)
+        for signature in signatures:
+            self.add_stix_signature(*signature)
+
+    @chainable
+    def set_analysis_conclusion(self, heuristic: bool = None):
+        if heuristic is not None:
+            self.heuristic = heuristic
 
     def set_scanner(self, **scanner):
         environment = {k: scanner.pop(k, None) for k in ('architecture', 'operating_system')}
         if any(environment.values()):
-            scanner['environment'] = environment
+            scanner.setdefault('environment', {}).update(environment)
         self.scanner = Scanner(**scanner)
         return self
 

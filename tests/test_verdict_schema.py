@@ -285,6 +285,20 @@ def test_set_scanner_arch():
     }
 
 
+def test_set_heuristic_conclusion():
+    verdict = Verdict().set_malware_family("unknown")\
+                       .set_analysis_conclusion(heuristic=True)
+    verdict.dict()['heuristic'] == True
+
+
+
+def test_set_invalid_heuristic_conclusion():
+    with pytest.raises(ValueError):
+        verdict = Verdict().set_malware_family("unknown")\
+                        .set_analysis_conclusion(heuristic='yeah sure buddy')
+        verdict.dict()['heuristic'] == True
+
+
 def test_set_scanner_psc_version():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")

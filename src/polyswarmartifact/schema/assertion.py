@@ -20,3 +20,9 @@ class Assertion(Schema):
     @chainable
     def add_artifacts(self, verdicts: List[Verdict]):
         self.__root__.extend(verdicts)
+
+    def __iter__(self):
+        return iter(self.__root__)
+
+    def __getitem__(self, item):
+        return self.__root__[item]

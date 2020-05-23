@@ -8,28 +8,25 @@ from pydantic import (
     validator,
 )
 
-from .schema import MD5, SHA1, SHA256, Schema
+from .schema import MD5, SHA1, SHA256, Schema, Missing
 
 
 class FileArtifact(Schema):
-    filename: Optional[str] = Field(description='captures the filename of the artifact', default=None)
-    filesize: Optional[PositiveInt] = Field(
-        description='specifies the size of the artifact in bytes', default=None
-    )
-    mimetype: StrictStr = Field(description='indicates the type of media this file represents', default=-1)
-    sha256: Optional[SHA256] = Field(title='SHA256', default=None)
-    sha1: Optional[SHA1] = Field(title='SHA1', default=None)
-    md5: Optional[MD5] = Field(title='MD5', default=None)
+    filename: Optional[str]
+    filesize: Optional[PositiveInt]
+    mimetype: StrictStr = Missing
+    sha256: Optional[SHA256] = Field(title='SHA256')
+    sha1: Optional[SHA1] = Field(title='SHA1')
+    md5: Optional[MD5] = Field(title='MD5')
 
 
 class URLArtifact(Schema):
     # protocol can actually be derived directly from `uri`, we keep it here to preserve a
     # preexisting interface.
-    protocol: str = None
-    uri: AnyUrl
+    protocol: Optional[str]
+    uri: AnyUrl = Missing
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __post_init__(self):
         if self.protocol is None:
             self.protocol = self.uri.protocol
 
@@ -53,3 +50,9 @@ class Bounty(Schema):
             uri = '{}://{}'.format(proto, next(reversed(uri.split('://', 1))))
         self.__root__.append(URLArtifact(uri=str(uri), protocol=protocol))
         return self
+
+    def __iter__(self):
+        return iter(self.__root__)
+
+    def __getitem__(self, item):
+        return self.__root__[item]

@@ -78,7 +78,7 @@ class Schema(BaseModel):
         return super().json(*args, **kwargs)
 
     @classmethod
-    def validate(cls: Type['Schema'], value: Any) -> 'Union[Schema, bool]':
+    def validate(cls: Type['Schema'], value: Any, **kwargs) -> 'Union[Schema, bool]':
         try:
             return BaseModel.validate.__func__(cls, value).check_consistency()
         except ValidationError:

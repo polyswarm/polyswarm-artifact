@@ -1,5 +1,7 @@
 import functools
+import inspect
 import logging
+from contextlib import contextmanager
 from typing import (
     Any,
     Callable,
@@ -29,7 +31,6 @@ Domain = constr(
     max_length=61 + 63 + 3
 )
 VersionStr = constr(regex=r"^[0-9]+([.][0-9]+)*$")
-Missing = object()
 
 
 def chainable(fn: Callable):
@@ -41,10 +42,24 @@ def chainable(fn: Callable):
     def setter_wrapper(self, *args: Any, **kwargs: Any) -> Any:
         fn(self, *args, **kwargs)
         return self
+
     return setter_wrapper
 
 
 class Schema(BaseModel):
+    def __init__(self, *args, **kwargs):
+        if args or kwargs:
+            super().__init__(*args, **kwargs)
+        else:
+            with self.disable_validations():
+                super().__init__()
+
+    def __getitem__(self, k):
+        try:
+            return getattr(self, k)
+        except AttributeError:
+            raise KeyError
+
     @classmethod
     def get_schema(cls):
         """
@@ -54,11 +69,18 @@ class Schema(BaseModel):
         """
         return cls.schema()
 
-    def __getitem__(self, k):
+    @contextmanager
+    def disable_validations(self):
         try:
-            return getattr(self, k)
-        except AttributeError:
-            raise KeyError
+            required_fields = set()
+            for name, field in self.__class__.__fields__.items():
+                if field.required is True:
+                    required_fields.add(name)
+                    field.required = False
+            yield
+        finally:
+            for name in required_fields:
+                self.__class__.__fields__[name].required = True
 
     def __str__(self):
         return self.json()

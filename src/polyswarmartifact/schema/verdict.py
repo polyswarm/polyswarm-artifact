@@ -2,7 +2,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from pydantic import Field, IPvAnyAddress, StrictStr
 
-from .schema import Domain, Missing, Schema, VersionStr, chainable
+from .schema import Domain, Schema, VersionStr, chainable
 
 
 class Scanner(Schema):
@@ -30,7 +30,8 @@ class StixSignature(Schema):
 
 class Verdict(Schema):
     malware_family: StrictStr = Field(
-        default=Missing, description='name of the malware family specified by this microengine'
+        default=...,
+        description='name of the malware family specified by this microengine',
     )
     domains: Optional[List[Domain]] = []
     ip_addresses: Optional[List[IPvAnyAddress]] = []

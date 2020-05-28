@@ -31,18 +31,17 @@ test-py36:
   except:
     - images
 
-test-py35:
-  image: python:3.5
+test-py37:
+  image: python:3.7
   stage: test
   tags:
     - kube
   before_script:
     - pip3 install tox
   script:
-    - tox -e py35
+    - tox -e py37
   except:
     - images
-
 ###############################################################
 # Release Stage
 ###############################################################

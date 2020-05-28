@@ -1,209 +1,96 @@
-import json
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from .schema import Schema
+from pydantic import Field, IPvAnyAddress, StrictStr
 
-VERDICT_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "verdict",
-    "type": "object",
-    "properties": {
-        "malware_family": {"type": "string"},
-        "domains": {
-            "type": ["array", "null"],
-            "items": {
-                "type": "string",
-                "format": "uri"
-            },
-            "minItems": 0
-        },
-        "ip_addresses": {
-            "type": ["array", "null"],
-            "items": {
-                "type": "string",
-                "format": "ipv4"
-            },
-            "minItems": 0
-        },
-        "stix_signatures": {
-            "type": ["array", "null"],
-            "items": {
-                "type": "object",
-                "properties": {
-                    "schema": {"type": ["string", "null"]},
-                    "signature": {"type": ["object", "string", "null"]}
-                },
-                "additionalItems": True
-            }
-        },
-        "scanner": {
-            "type": ["object", "null"],
-            "properties": {
-                "version": {
-                    "type": ["string", "null"],
-                    "pattern": "^\\d+\\.\\d+\\.\\d+$"
-                },
-                "polyswarmclient_version": {
-                    "type": ["string", "null"],
-                    "pattern": "^\\d+\\.\\d+\\.\\d+$"
-                },
-                "vendor_version": {"type": ["string", "null"]},
-                "signatures_version": {"type": ["string", "null"]},
-                "environment": {
-                    "type": ["object", "null"],
-                    "properties": {
-                        "operating_system": {"type": ["string", "null"]},
-                        "architecture": {"type": ["string", "null"]}
-                    }
-                }
-            },
-            "additionalItems": True
-        }
-    },
-    "additionalItems": True,
-    "required": ["malware_family"]
-}
+from .schema import Domain, Missing, Schema, VersionStr, chainable
+
+
+class Scanner(Schema):
+    version: Optional[VersionStr] = Field(
+        description="version of the microengine that generated the assertion"
+    )
+    polyswarmclient_version: Optional[VersionStr] = Field(description="version of polyswarmclient")
+    vendor_version: Optional[str] = Field(description="version of the engine that generated the assertion")
+    signatures_version: Optional[str] = Field(description="version of the engine's antimalware signatures")
+    environment: Optional[Dict[str, Any]] = Field(description="analysis environment metadata")
+
+
+class StixSignature(Schema):
+    stix_schema: str = Field(alias='schema')
+    signature: Any
+
+    @property
+    def schema(self):
+        return self.stix_schema
+
+    def dict(self, **kwargs):
+        kwargs['by_alias'] = True
+        return super().dict(**kwargs)
 
 
 class Verdict(Schema):
-    def __init__(self):
-        self.malware_family = None
-        self.scanner = None
-        self.domains = None
-        self.ip_addresses = None
-        self.stix = None
-        self.extra = None
+    malware_family: StrictStr = Field(
+        default=Missing, description='name of the malware family specified by this microengine'
+    )
+    domains: Optional[List[Domain]] = []
+    ip_addresses: Optional[List[IPvAnyAddress]] = []
+    stix: Optional[List[StixSignature]] = []
+    scanner: Optional[Scanner]
+    heuristic: Optional[bool] = Field(description='indicator for assertions generated from heuristics')
 
-    def add_domain(self, domain):
-        if self.domains is None:
-            self.domains = []
+    @property
+    def extra(self):
+        return [(k, v) for k, v in self.__dict__.items() if k not in self.__fields__]
 
+    @chainable
+    def add_domain(self, domain: Domain):
         self.domains.append(domain)
-        return self
 
-    def add_domains(self, domains):
-        if self.domains is None:
-            self.domains = []
-
+    @chainable
+    def add_domains(self, domains: Iterable[Domain]):
         self.domains.extend(domains)
-        return self
 
-    def add_extra(self, key, value):
-        if self.extra is None:
-            self.extra = []
-
-        self.extra.append((key, value))
-
-        return self
-
-    def add_extras(self, extras):
-        if self.extra is None:
-            self.extra = []
-
-        for k, v in extras:
-            self.extra.append((k, v))
-
-        return self
-
-    def add_ip_address(self, ip_address):
-        if self.ip_addresses is None:
-            self.ip_addresses = []
-
-        self.ip_addresses.append(ip_address)
-        return self
-
-    def add_ip_addresses(self, ip_addresses):
-        if self.ip_addresses is None:
-            self.ip_addresses = []
-
-        self.ip_addresses.extend(ip_addresses)
-        return self
-
-    def add_stix_signature(self, schema, signature):
-        if self.stix is None:
-            self.stix = []
-
-        self.stix.append({"schema": schema, "signature": signature})
-        return self
-
-    def add_stix_signatures(self, signatures):
-        if self.stix is None:
-            self.stix = []
-
-        for schema, signature in signatures:
-            self.stix.append({"schema": schema, "signature": signature})
-        return self
-
-    @classmethod
-    def get_schema(cls):
-        """
-        Get the path to the backing schema this Metadata object users
-        :return: Tuple[string, string] where first string is the path,
-        and the second is the schema name
-        """
-        return VERDICT_SCHEMA
-
-    def json(self):
-        """
-        Convert metadata implementation into json string
-        :return: JSON string representing the internal type of this object
-        """
-        output = VerdictEncoder().encode(self)
-        if not Verdict.validate(json.loads(output)):
-            raise ValueError('Invalid Artifact setup')
-
-        return output
-
-    def set_malware_family(self, malware_family):
+    @chainable
+    def set_malware_family(self, malware_family: str):
         self.malware_family = malware_family
+
+    @chainable
+    def add_extra(self, key: str, value: Any):
+        setattr(self, key, value)
+
+    @chainable
+    def add_extras(self, extras: Iterable[Tuple[str, Any]]):
+        for k, v in extras:
+            self.add_extra(k, v)
+
+    @chainable
+    def add_ip_address(self, ip_address: IPvAnyAddress):
+        self.ip_addresses.append(ip_address)
+
+    @chainable
+    def add_ip_addresses(self, ip_addresses: Iterable[IPvAnyAddress]):
+        self.ip_addresses.extend(ip_addresses)
+
+    @chainable
+    def add_stix_signature(self, stix_schema: str, signature: Any):
+        self.stix.append(StixSignature(schema=stix_schema, signature=signature))
+
+    @chainable
+    def add_stix_signatures(self, signatures: Iterable[Tuple[str, Any]]):
+        for signature in signatures:
+            self.add_stix_signature(*signature)
+
+    @chainable
+    def set_analysis_conclusion(self, heuristic: bool = None):
+        if heuristic is not None:
+            self.heuristic = heuristic
+
+    def set_scanner(self, **scanner):
+        environment = {k: scanner.pop(k, None) for k in ('architecture', 'operating_system')}
+        if any(environment.values()):
+            scanner.setdefault('environment', {}).update(environment)
+        self.scanner = Scanner(**scanner)
         return self
 
-    def set_scanner(self, operating_system=None, architecture=None, version=None, polyswarmclient_version=None,
-                    signatures_version=None, vendor_version=None):
-        scanner = {}
-
-        if operating_system is not None or architecture is not None:
-            scanner["environment"] = {
-                "operating_system": operating_system,
-                "architecture": architecture
-            }
-
-        if polyswarmclient_version is not None:
-            scanner["polyswarmclient_version"] = polyswarmclient_version
-
-        if version is not None:
-            scanner["version"] = version
-
-        if signatures_version is not None:
-            scanner["signatures_version"] = signatures_version
-
-        if vendor_version is not None:
-            scanner['vendor_version'] = vendor_version
-
-        self.scanner = scanner if scanner else None
-        return self
-
-
-class VerdictEncoder(json.JSONEncoder):
-    def encode(self, obj):
-        if isinstance(obj, Verdict):
-            output = {
-                "malware_family": obj.malware_family,
-            }
-
-            if obj.scanner:
-                output["scanner"] = obj.scanner
-
-            if obj.domains:
-                output['domains'] = obj.domains
-
-            if obj.ip_addresses:
-                output['ip_addresses'] = obj.ip_addresses
-
-            if obj.stix:
-                output['stix'] = obj.stix
-
-            if obj.extra:
-                for key, value in obj.extra:
-                    output[key] = value
-
-            return json.dumps(output)
+    class Config:
+        extra = 'allow'

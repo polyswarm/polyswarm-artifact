@@ -148,10 +148,10 @@ def test_validate_two_ip_at_once():
 def test_validate_ip_invalid():
     # arrange
     verdict = Verdict()
-    # act
-    verdict.add_ip_address('asdf')
     # assert
     with pytest.raises(ValueError):
+        # act
+        verdict.add_ip_address('asdf')
         verdict.json()
 
 
@@ -285,6 +285,20 @@ def test_set_scanner_arch():
     }
 
 
+def test_set_heuristic_conclusion():
+    verdict = Verdict().set_malware_family("unknown")\
+                       .set_analysis_conclusion(heuristic=True)
+    verdict.dict()['heuristic'] == True
+
+
+
+def test_set_invalid_heuristic_conclusion():
+    with pytest.raises(ValueError):
+        verdict = Verdict().set_malware_family("unknown")\
+                        .set_analysis_conclusion(heuristic='yeah sure buddy')
+        verdict.dict()['heuristic'] == True
+
+
 def test_set_scanner_psc_version():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
@@ -362,11 +376,11 @@ def test_scanner_null_version():
 def test_scanner_invalid_version():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
-    # act
-    verdict.set_scanner(operating_system="windows", architecture="x86", version="asdf", polyswarmclient_version="2.0.2",
-                        signatures_version="2019", vendor_version="1.0.0")
     # assert
     with pytest.raises(ValueError):
+        # act
+        verdict.set_scanner(operating_system="windows", architecture="x86", version="asdf", polyswarmclient_version="2.0.2",
+                            signatures_version="2019", vendor_version="1.0.0")
         Verdict.validate(json.loads(verdict.json()))
 
 
@@ -393,11 +407,11 @@ def test_scanner_null_psc_version():
 def test_scanner_invalid_psc_version():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
-    # act
-    verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version="asdf",
-                        signatures_version="2019", vendor_version="1.0.0")
     # assert
     with pytest.raises(ValueError):
+        # act
+        verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version="asdf",
+                            signatures_version="2019", vendor_version="1.0.0")
         Verdict.validate(json.loads(verdict.json()))
 
 
@@ -618,7 +632,6 @@ def test_validate_all_output():
     # assert
     assert Verdict.validate(blob)
     assert blob == result
-
 
 def test_empty_domain_list():
     # arrange

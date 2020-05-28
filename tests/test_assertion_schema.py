@@ -76,12 +76,12 @@ def test_invalid_artifact_throws_value_error():
 
 
 def test_none_artifact_encodes_to_none():
-    # arrange
-    # act
-    assertion = Assertion()\
-        .add_artifact(None)
     # assert
     with pytest.raises(ValueError):
+        # arrange
+        # act
+        assertion = Assertion()\
+            .add_artifact(None)
         assertion.json()
 
 

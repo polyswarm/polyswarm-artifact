@@ -1,62 +1,28 @@
-import json
-import os
-import pkg_resources
-from jsonschema import RefResolver
+from typing import List
 
-from .schema import Schema
-from .verdict import VerdictEncoder, VERDICT_SCHEMA
+from pydantic import Field
 
-ASSERTION_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "assertion",
-    "type": "array",
-    "minItems": 1,
-    "maxItems": 256,
-    "items": {"$ref": "verdict"}
-}
+from .schema import Schema, chainable
+from .verdict import Verdict
 
 
 class Assertion(Schema):
-    def __init__(self, ):
-        self.artifacts = []
+    __root__: List[Verdict] = Field(min_items=1, max_items=256, default=[])
 
-    def add_artifact(self, artifact):
-        self.artifacts.append(artifact)
-        return self
+    @property
+    def artifacts(self):
+        return self.__root__
 
-    def add_artifacts(self, artifacts):
-        self.artifacts.extend(artifacts)
-        return self
+    @chainable
+    def add_artifact(self, verdict: Verdict):
+        self.__root__.append(verdict)
 
-    @classmethod
-    def get_schema(cls):
-        """
-        Get the path to the backing schema this Metadata object users
-        :return: Tuple[string, string] where first string is the path,
-        and the second is the schema name
-        """
-        return ASSERTION_SCHEMA
+    @chainable
+    def add_artifacts(self, verdicts: List[Verdict]):
+        self.__root__.extend(verdicts)
 
-    @classmethod
-    def validate(cls, value, resolver=None, silent=False):
-        resolver = RefResolver.from_schema(VERDICT_SCHEMA)
-        return super().validate(value, resolver, silent)
+    def __iter__(self):
+        return iter(self.__root__)
 
-    def json(self):
-        """
-        Convert metadata implementation into json string
-        :return: JSON string representing the internal type of this object
-        """
-        if any([artifact is None for artifact in self.artifacts]):
-            raise ValueError('Artifacts cannot be None')
-        output = AssertionEncoder().encode(self)
-        if not Assertion.validate(json.loads(output)):
-            raise ValueError('Invalid Bounty setup')
-
-        return output
-
-
-class AssertionEncoder(json.JSONEncoder):
-    def encode(self, obj):
-        if isinstance(obj, Assertion):
-            return json.dumps([json.loads(VerdictEncoder().encode(artifact)) for artifact in obj.artifacts])
+    def __getitem__(self, item):
+        return self.__root__[item]

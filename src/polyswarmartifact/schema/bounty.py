@@ -8,13 +8,13 @@ from pydantic import (
     validator,
 )
 
-from .schema import MD5, SHA1, SHA256, Schema, Missing
+from .schema import MD5, SHA1, SHA256, Schema
 
 
 class FileArtifact(Schema):
     filename: Optional[str]
     filesize: Optional[PositiveInt]
-    mimetype: StrictStr = Missing
+    mimetype: StrictStr = ...
     sha256: Optional[SHA256] = Field(title='SHA256')
     sha1: Optional[SHA1] = Field(title='SHA1')
     md5: Optional[MD5] = Field(title='MD5')
@@ -24,7 +24,7 @@ class URLArtifact(Schema):
     # protocol can actually be derived directly from `uri`, we keep it here to preserve a
     # preexisting interface.
     protocol: Optional[str]
-    uri: AnyUrl = Missing
+    uri: AnyUrl = ...
 
     def __post_init__(self):
         if self.protocol is None:

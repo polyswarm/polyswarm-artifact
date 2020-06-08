@@ -108,8 +108,24 @@ class Schema(BaseModel):
 
 
 class CollectionSchema(Schema):
+    """Schema for objects which are collections of other types"""
+    def __len__(self):
+        return len(self.__root__)
+
     def __iter__(self):
         return iter(self.__root__)
 
+    def __contains__(self, o):
+        return o in self.__root__
+
     def __getitem__(self, item):
         return self.__root__[item]
+
+    def __iadd__(self, os):
+        return self.__root__.__iadd__(os)
+
+    def append(self, o):
+        return self.__root__.append(o)
+
+    def extend(self, os):
+        return self.__root__.extend(os)

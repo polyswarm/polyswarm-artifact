@@ -1,4 +1,5 @@
 import pytest
+
 from polyswarmartifact import ArtifactType
 from polyswarmartifact.exceptions import DecodeError
 

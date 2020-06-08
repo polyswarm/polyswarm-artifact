@@ -1,5 +1,5 @@
-import logging
 from enum import Enum
+import logging
 
 from .exceptions import DecodeError
 

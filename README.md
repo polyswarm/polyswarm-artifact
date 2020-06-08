@@ -18,36 +18,27 @@ Since we cannot remove fields, when a field is no longer useful, it needs to be 
 Unfortunately we cannot add nullable at a later date, as that would invalidate new schemas when being read by an old  
 
 We can easily remove required fields, but we cannot add more. 
-Doing so would invalidated old schemas.  
+Doing so would invalidated old schemas.
 
 ## Schema object
 
-Schema objects possess the following methods and attributes:
+Descendants of the `Schema` class also inherit this methods & attributes:
 
-``dict()``
+- ``dict()``
     returns a dictionary of the model's fields and values
-``json()``
+- ``json()``
     returns a JSON string representation dict()
-``copy()``
+- ``copy()``
     returns a deep copy of the model
-``parse_obj()``
+- ``parse_obj()``
     a utility for loading any object into a model with error handling if the object is not a dictionary
-``parse_raw()``
-    a utility for loading strings of numerous formats
-``parse_file()``
-    like parse_raw() but for files
-``from_orm()``
-    loads data into a model from an arbitrary class
-``schema()``
+- ``schema()``
     returns a dictionary representing the model as JSON Schema
-``schema_json()``
+- ``schema_json()``
     returns a JSON string representation of schema()
-``construct()``
-    a class method for creating models without running validation
-``__fields_set__``
+- ``__fields_set__``
     Set of names of fields which were set when the model instance was initialised
-``__fields__``
+- ``__fields__``
     a dictionary of the model's fields
-``__config__``
+- ``__config__``
     the configuration class for the model
-

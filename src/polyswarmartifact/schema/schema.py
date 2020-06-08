@@ -1,21 +1,21 @@
+from contextlib import contextmanager
+from copy import deepcopy
 import functools
 import inspect
 import logging
-from contextlib import contextmanager
 from typing import (
     Any,
     Callable,
     Collection,
     Mapping,
+    NewType,
     Sequence,
     Set,
     Type,
-    NewType,
     Union,
 )
-from copy import deepcopy
-from pydantic import BaseModel, ValidationError, constr
-# from pydantic import validate_arguments
+
+from pydantic import BaseModel, ValidationError, constr, validate_arguments
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ def chainable(fn: Callable):
     """
     Decorator to validate the arguments passed to a function, returning self
     """
-    # @validate_arguments
+    @validate_arguments
     @functools.wraps(fn)
     def setter_wrapper(self, *args: Any, **kwargs: Any) -> Any:
         fn(self, *args, **kwargs)
@@ -82,22 +82,10 @@ class Schema(BaseModel):
             for name in required_fields:
                 self.__class__.__fields__[name].required = True
 
-    def __str__(self):
-        return self.json()
-
-    def __eq__(self, other):
-        if isinstance(other, dict):
-            return self.dict(exclude_defaults=True) == other
-        else:
-            return super().__eq__(other)
-
     def dict(self, *args, **kwargs):
+        kwargs['exclude_none'] = True
         self.check_consistency()
         return super().dict(*args, **kwargs)
-
-    def json(self, *args, **kwargs):
-        kwargs.setdefault('exclude_defaults', True)
-        return super().json(*args, **kwargs)
 
     @classmethod
     def validate(cls: Type['Schema'], value: Any, **kwargs) -> 'Union[Schema, bool]':
@@ -117,3 +105,11 @@ class Schema(BaseModel):
         if errors:
             raise ValidationError(errors, self.__class__)
         return self
+
+
+class CollectionSchema(Schema):
+    def __iter__(self):
+        return iter(self.__root__)
+
+    def __getitem__(self, item):
+        return self.__root__[item]

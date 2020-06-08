@@ -1,5 +1,7 @@
+from ipaddress import IPv4Address, IPv6Address
 import json
 import logging
+
 import pytest
 
 from polyswarmartifact.schema.verdict import Verdict
@@ -105,7 +107,7 @@ def test_add_ip():
     # act
     verdict.add_ip_address('192.168.0.1')
     # assert
-    assert verdict.ip_addresses == ['192.168.0.1']
+    assert verdict.ip_addresses == [IPv4Address('192.168.0.1')]
 
 
 def test_add_two_ip():
@@ -115,7 +117,18 @@ def test_add_two_ip():
     verdict.add_ip_address('192.168.0.1')
     verdict.add_ip_address('8.8.8.8')
     # assert
-    assert verdict.ip_addresses == ['192.168.0.1', '8.8.8.8']
+    assert verdict.ip_addresses == [IPv4Address('192.168.0.1'), IPv4Address('8.8.8.8')]
+
+
+def test_add_two_diff_ip_versions():
+    # arrange
+    verdict = Verdict()
+    # act
+    ipv6_addr = IPv6Address('2001:0db8:85a3:0000:0000:8a2e:0370:7334')
+    verdict.add_ip_address(str(ipv6_addr))
+    verdict.add_ip_address('8.8.8.8')
+    # assert
+    assert verdict.ip_addresses == [ipv6_addr, IPv4Address('8.8.8.8')]
 
 
 def test_add_two_ip_at_once():
@@ -159,10 +172,7 @@ def test_add_stix_string():
     # arrange
     verdict = Verdict()
     # act
-    verdict.add_stix_signature(
-        'oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json',
-        "a0"
-    )
+    verdict.add_stix_signature('oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json', "a0")
     # assert
     assert verdict.stix[0]['schema'] == 'oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json'
     assert verdict.stix[0]['signature'] == "a0"
@@ -172,60 +182,56 @@ def test_add_stix_object():
     # arrange
     verdict = Verdict()
     # act
-    verdict.add_stix_signature('oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json', {
-        "kill_chain_name": 'asdf',
-        "phase_name": "full"
-    })
+    verdict.add_stix_signature(
+        'oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json', {
+            "kill_chain_name": 'asdf',
+            "phase_name": "full"
+        }
+    )
     # assert
-    assert verdict.stix[0]['schema'] == 'oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json'
-    assert verdict.stix[0]['signature'] == {
-        "kill_chain_name": 'asdf',
-        "phase_name": "full"
-    }
+    assert verdict.stix[0][
+        'schema'] == 'oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json'
+    assert verdict.stix[0]['signature'] == {"kill_chain_name": 'asdf', "phase_name": "full"}
 
 
 def test_add_two_stix_sigs():
     # arrange
     verdict = Verdict()
     # act
+    verdict.add_stix_signature('oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json', "a0")
     verdict.add_stix_signature(
-        'oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json',
-        "a0"
+        'oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json', {
+            "kill_chain_name": 'asdf',
+            "phase_name": "full"
+        }
     )
-    verdict.add_stix_signature('oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json', {
-        "kill_chain_name": 'asdf',
-        "phase_name": "full"
-    })
     # assert
     assert verdict.stix[0]['schema'] == 'oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json'
     assert verdict.stix[0]['signature'] == "a0"
-    assert verdict.stix[1]['schema'] == 'oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json'
-    assert verdict.stix[1]['signature'] == {
-        "kill_chain_name": 'asdf',
-        "phase_name": "full"
-    }
+    assert verdict.stix[1][
+        'schema'] == 'oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json'
+    assert verdict.stix[1]['signature'] == {"kill_chain_name": 'asdf', "phase_name": "full"}
 
 
 def test_add_two_stix_sigs_at_once():
     # arrange
     verdict = Verdict()
     # act
-    verdict.add_stix_signatures([(
-        'oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json',
-        "a0"
-    ),
-        ('oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json', {
-            "kill_chain_name": 'asdf',
-            "phase_name": "full"
-        })])
+    verdict.add_stix_signatures([
+        ('oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json', "a0"),
+        (
+            'oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json', {
+                "kill_chain_name": 'asdf',
+                "phase_name": "full"
+            }
+        )
+    ])
     # assert
     assert verdict.stix[0]['schema'] == 'oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json'
     assert verdict.stix[0]['signature'] == "a0"
-    assert verdict.stix[1]['schema'] == 'oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json'
-    assert verdict.stix[1]['signature'] == {
-        "kill_chain_name": 'asdf',
-        "phase_name": "full"
-    }
+    assert verdict.stix[1][
+        'schema'] == 'oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json'
+    assert verdict.stix[1]['signature'] == {"kill_chain_name": 'asdf', "phase_name": "full"}
 
 
 def test_validate_stix_object():
@@ -236,7 +242,8 @@ def test_validate_stix_object():
         'oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json', {
             "kill_chain_name": 'asdf',
             "phase_name": "full"
-        })
+        }
+    )
     # assert
     assert Verdict.validate(json.loads(verdict.json()))
 
@@ -245,14 +252,15 @@ def test_validate_two_stix_sigs_at_once():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.add_stix_signatures([(
-        'oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json',
-        "a0"
-    ),
-        ('oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json', {
-            "kill_chain_name": 'asdf',
-            "phase_name": "full"
-        })])
+    verdict.add_stix_signatures([
+        ('oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json', "a0"),
+        (
+            'oasis-open/cti-stix2-json-schemas/master/schemas/common/kill-chain-phase.json', {
+                "kill_chain_name": 'asdf',
+                "phase_name": "full"
+            }
+        )
+    ])
     # assert
     assert Verdict.validate(json.loads(verdict.json()))
 
@@ -263,12 +271,7 @@ def test_set_scanner_os():
     # act
     verdict.set_scanner(operating_system="windows")
     # assert
-    assert verdict.scanner == {
-        "environment": {
-            "operating_system": "windows",
-            "architecture": None
-        }
-    }
+    assert verdict.scanner == {"environment": {"operating_system": "windows", "architecture": None}}
 
 
 def test_set_scanner_arch():
@@ -277,19 +280,13 @@ def test_set_scanner_arch():
     # act
     verdict.set_scanner(architecture="x86")
     # assert
-    assert verdict.scanner == {
-        "environment": {
-            "operating_system": None,
-            "architecture": "x86"
-        }
-    }
+    assert verdict.scanner == {"environment": {"operating_system": None, "architecture": "x86"}}
 
 
 def test_set_heuristic_conclusion():
     verdict = Verdict().set_malware_family("unknown")\
                        .set_analysis_conclusion(heuristic=True)
     verdict.dict()['heuristic'] == True
-
 
 
 def test_set_invalid_heuristic_conclusion():
@@ -305,9 +302,7 @@ def test_set_scanner_psc_version():
     # act
     verdict.set_scanner(polyswarmclient_version="1.1.1")
     # assert
-    assert verdict.scanner == {
-        "polyswarmclient_version": "1.1.1"
-    }
+    assert verdict.scanner == {"polyswarmclient_version": "1.1.1"}
 
 
 def test_set_scanner_with_signature_version():
@@ -316,9 +311,7 @@ def test_set_scanner_with_signature_version():
     # act
     verdict.set_scanner(signatures_version="05-12-2019")
     # assert
-    assert verdict.scanner == {
-        "signatures_version": "05-12-2019"
-    }
+    assert verdict.scanner == {"signatures_version": "05-12-2019"}
 
 
 def test_set_scanner_with_version():
@@ -327,9 +320,7 @@ def test_set_scanner_with_version():
     # act
     verdict.set_scanner(version="1.1.1")
     # assert
-    assert verdict.scanner == {
-        "version": "1.1.1"
-    }
+    assert verdict.scanner == {"version": "1.1.1"}
 
 
 def test_set_scanner_with_vendor_version():
@@ -338,17 +329,21 @@ def test_set_scanner_with_vendor_version():
     # act
     verdict.set_scanner(vendor_version="1.1.1")
     # assert
-    assert verdict.scanner == {
-        "vendor_version": "1.1.1"
-    }
+    assert verdict.scanner == {"vendor_version": "1.1.1"}
 
 
 def test_validate_scanner():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version="2.0.2",
-                        signatures_version="2019", vendor_version="1.0.0")
+    verdict.set_scanner(
+        operating_system="windows",
+        architecture="x86",
+        version="1.0.0",
+        polyswarmclient_version="2.0.2",
+        signatures_version="2019",
+        vendor_version="1.0.0"
+    )
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
@@ -357,8 +352,13 @@ def test_scanner_no_version():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.set_scanner(operating_system="windows", architecture="x86", polyswarmclient_version="2.0.2",
-                        signatures_version="2019", vendor_version="1.0.0")
+    verdict.set_scanner(
+        operating_system="windows",
+        architecture="x86",
+        polyswarmclient_version="2.0.2",
+        signatures_version="2019",
+        vendor_version="1.0.0"
+    )
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
@@ -367,8 +367,14 @@ def test_scanner_null_version():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.set_scanner(operating_system="windows", architecture="x86", version=None, polyswarmclient_version="2.0.2",
-                        signatures_version="2019", vendor_version="1.0.0")
+    verdict.set_scanner(
+        operating_system="windows",
+        architecture="x86",
+        version=None,
+        polyswarmclient_version="2.0.2",
+        signatures_version="2019",
+        vendor_version="1.0.0"
+    )
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
@@ -379,8 +385,14 @@ def test_scanner_invalid_version():
     # assert
     with pytest.raises(ValueError):
         # act
-        verdict.set_scanner(operating_system="windows", architecture="x86", version="asdf", polyswarmclient_version="2.0.2",
-                            signatures_version="2019", vendor_version="1.0.0")
+        verdict.set_scanner(
+            operating_system="windows",
+            architecture="x86",
+            version="asdf",
+            polyswarmclient_version="2.0.2",
+            signatures_version="2019",
+            vendor_version="1.0.0"
+        )
         Verdict.validate(json.loads(verdict.json()))
 
 
@@ -388,8 +400,13 @@ def test_scanner_no_psc_version():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # assert
-    verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0",
-                        signatures_version="2019", vendor_version="1.0.0")
+    verdict.set_scanner(
+        operating_system="windows",
+        architecture="x86",
+        version="1.0.0",
+        signatures_version="2019",
+        vendor_version="1.0.0"
+    )
     # act
     Verdict.validate(json.loads(verdict.json()))
 
@@ -398,8 +415,14 @@ def test_scanner_null_psc_version():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version=None,
-                        signatures_version="2019", vendor_version="1.0.0")
+    verdict.set_scanner(
+        operating_system="windows",
+        architecture="x86",
+        version="1.0.0",
+        polyswarmclient_version=None,
+        signatures_version="2019",
+        vendor_version="1.0.0"
+    )
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
@@ -410,8 +433,14 @@ def test_scanner_invalid_psc_version():
     # assert
     with pytest.raises(ValueError):
         # act
-        verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version="asdf",
-                            signatures_version="2019", vendor_version="1.0.0")
+        verdict.set_scanner(
+            operating_system="windows",
+            architecture="x86",
+            version="1.0.0",
+            polyswarmclient_version="asdf",
+            signatures_version="2019",
+            vendor_version="1.0.0"
+        )
         Verdict.validate(json.loads(verdict.json()))
 
 
@@ -419,8 +448,13 @@ def test_scanner_no_signature_version():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version="2.0.2",
-                        vendor_version="1.0.0")
+    verdict.set_scanner(
+        operating_system="windows",
+        architecture="x86",
+        version="1.0.0",
+        polyswarmclient_version="2.0.2",
+        vendor_version="1.0.0"
+    )
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
@@ -429,8 +463,14 @@ def test_scanner_null_signature_version():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version="2.0.2",
-                        signatures_version=None, vendor_version="1.0.0")
+    verdict.set_scanner(
+        operating_system="windows",
+        architecture="x86",
+        version="1.0.0",
+        polyswarmclient_version="2.0.2",
+        signatures_version=None,
+        vendor_version="1.0.0"
+    )
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
@@ -439,8 +479,13 @@ def test_scanner_no_vendor_version():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version="2.0.2",
-                        signatures_version="2019")
+    verdict.set_scanner(
+        operating_system="windows",
+        architecture="x86",
+        version="1.0.0",
+        polyswarmclient_version="2.0.2",
+        signatures_version="2019"
+    )
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
@@ -449,8 +494,14 @@ def test_scanner_null_vendor_version():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version="2.0.2",
-                        signatures_version="2019", vendor_version=None)
+    verdict.set_scanner(
+        operating_system="windows",
+        architecture="x86",
+        version="1.0.0",
+        polyswarmclient_version="2.0.2",
+        signatures_version="2019",
+        vendor_version=None
+    )
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
@@ -459,8 +510,9 @@ def test_scanner_null_environemnt():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.set_scanner(version="1.0.0", polyswarmclient_version="2.0.2",
-                        signatures_version="2019", vendor_version="1.0.0")
+    verdict.set_scanner(
+        version="1.0.0", polyswarmclient_version="2.0.2", signatures_version="2019", vendor_version="1.0.0"
+    )
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
@@ -469,8 +521,13 @@ def test_scanner_environemnt_no_os():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.set_scanner(architecture="x86", version="1.0.0", polyswarmclient_version="2.0.2",
-                        signatures_version="2019", vendor_version="1.0.0")
+    verdict.set_scanner(
+        architecture="x86",
+        version="1.0.0",
+        polyswarmclient_version="2.0.2",
+        signatures_version="2019",
+        vendor_version="1.0.0"
+    )
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
@@ -479,8 +536,14 @@ def test_scanner_environemnt_null_os():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.set_scanner(operating_system=None, architecture="x86", version="1.0.0", polyswarmclient_version="2.0.2",
-                        signatures_version="2019", vendor_version="1.0.0")
+    verdict.set_scanner(
+        operating_system=None,
+        architecture="x86",
+        version="1.0.0",
+        polyswarmclient_version="2.0.2",
+        signatures_version="2019",
+        vendor_version="1.0.0"
+    )
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
@@ -489,8 +552,13 @@ def test_scanner_environemnt_no_arch():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.set_scanner(operating_system="windows", version="1.0.0", polyswarmclient_version="2.0.2",
-                        signatures_version="2019", vendor_version="1.0.0")
+    verdict.set_scanner(
+        operating_system="windows",
+        version="1.0.0",
+        polyswarmclient_version="2.0.2",
+        signatures_version="2019",
+        vendor_version="1.0.0"
+    )
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
@@ -499,8 +567,14 @@ def test_scanner_environemnt_null_arch():
     # arrange
     verdict = Verdict().set_malware_family("Eicar")
     # act
-    verdict.set_scanner(operating_system="windows", architecture="None", version="1.0.0",
-                        polyswarmclient_version="2.0.2", signatures_version="2019", vendor_version="1.0.0")
+    verdict.set_scanner(
+        operating_system="windows",
+        architecture="None",
+        version="1.0.0",
+        polyswarmclient_version="2.0.2",
+        signatures_version="2019",
+        vendor_version="1.0.0"
+    )
     # assert
     Verdict.validate(json.loads(verdict.json()))
 
@@ -632,6 +706,7 @@ def test_validate_all_output():
     # assert
     assert Verdict.validate(blob)
     assert blob == result
+
 
 def test_empty_domain_list():
     # arrange
@@ -924,7 +999,9 @@ def test_extra_object_scanner():
             "signature": "a0"
         }],
         "scanner": {
-            "extra": {"test": "tester"},
+            "extra": {
+                "test": "tester"
+            },
             "version": "1.0.0",
             "polyswarmclient_version": "2.0.2",
             "signatures_version": "2019",
@@ -998,7 +1075,9 @@ def test_extra_object_stix():
         "domains": ["polyswarm.io"],
         "ip_addresses": ["192.168.0.1"],
         "stix": [{
-            "extra": {"test": "tester"},
+            "extra": {
+                "test": "tester"
+            },
             "schema": "oasis-open/cti-stix2-json-schemas/master/schemas/common/hex.json",
             "signature": "a0"
         }],

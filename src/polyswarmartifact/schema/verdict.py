@@ -14,6 +14,9 @@ class Scanner(Schema):
     signatures_version: Optional[str] = Field(description="version of the engine's antimalware signatures")
     environment: Optional[Dict[str, Any]] = Field(description="analysis environment metadata")
 
+    class Config:
+        extra = 'allow'
+
 
 class StixSignature(Schema):
     stix_schema: str = Field(alias='schema')
@@ -26,6 +29,9 @@ class StixSignature(Schema):
     def dict(self, **kwargs):
         kwargs['by_alias'] = True
         return super().dict(**kwargs)
+
+    class Config:
+        extra = 'allow'
 
 
 class Verdict(Schema):
@@ -83,8 +89,7 @@ class Verdict(Schema):
 
     @chainable
     def set_analysis_conclusion(self, heuristic: bool = None):
-        if heuristic is not None:
-            self.heuristic = heuristic
+        self.heuristic = heuristic
 
     def set_scanner(self, **scanner):
         environment = {k: scanner.pop(k, None) for k in ('architecture', 'operating_system')}

@@ -1,16 +1,15 @@
 import json
 
 import pytest
+
 from polyswarmartifact.schema.bounty import Bounty
 
 
 def test_valid_blob_validates_true():
     # arrange
-    blob = [
-        {
-            "mimetype": "text/plain",
-        }
-    ]
+    blob = [{
+        "mimetype": "text/plain",
+    }]
     # act
     result = Bounty.validate(blob)
     # assert
@@ -19,11 +18,9 @@ def test_valid_blob_validates_true():
 
 def test_invalid_scanner_validates_false():
     # arrange
-    blob = [
-        {
-            "filesize": "1",
-        }
-    ]
+    blob = [{
+        "filesize": "1",
+    }]
     # act
     result = Bounty.validate(blob)
     # assert
@@ -33,9 +30,7 @@ def test_invalid_scanner_validates_false():
 def test_add_file_artifact():
     # arrange
     bounty = Bounty()
-    artifact = {
-        "mimetype": "text/plain"
-    }
+    artifact = {"mimetype": "text/plain"}
     # act
     bounty.add_file_artifact(mimetype="text/plain")
     # assert
@@ -45,10 +40,7 @@ def test_add_file_artifact():
 def test_add_url_artifact():
     # arrange
     bounty = Bounty()
-    artifact = {
-        "protocol": "https://",
-        "uri": 'https://google.com'
-    }
+    artifact = {"protocol": "https://", "uri": 'https://google.com'}
     # act
     bounty.add_url_artifact(protocol="https://", uri='google.com')
     # assert
@@ -68,6 +60,7 @@ def test_add_both_artifact():
     with pytest.raises(ValueError):
         bounty.json()
 
+
 def test_add_both_artifact_new():
     # arrange
     bounty = Bounty()
@@ -78,7 +71,6 @@ def test_add_both_artifact_new():
         bounty.add_file_artifact(mimetype="test")
         # assert
         bounty.json()
-
 
 
 def test_add_full_artifact():
@@ -93,10 +85,14 @@ def test_add_full_artifact():
         'md5': "772ac1a55fab1122f3b369ee9cd31549"
     }
     # act
-    bounty.add_file_artifact(mimetype="text/plain", filename="file", filesize=1,
-                                 sha256="74b4147957813b62cc8987f2b711ddb31f8cb46dcbf71502033da66053c8780a",
-                                 sha1="f013d66c7f6817d08b7eb2a93e6d0440c1f3e7f8",
-                                 md5="772ac1a55fab1122f3b369ee9cd31549")
+    bounty.add_file_artifact(
+        mimetype="text/plain",
+        filename="file",
+        filesize=1,
+        sha256="74b4147957813b62cc8987f2b711ddb31f8cb46dcbf71502033da66053c8780a",
+        sha1="f013d66c7f6817d08b7eb2a93e6d0440c1f3e7f8",
+        md5="772ac1a55fab1122f3b369ee9cd31549"
+    )
     # assert
     assert bounty.artifacts and bounty.artifacts[0].dict() == artifact
 
@@ -142,11 +138,13 @@ def test_builder_256_scanners_is_valid():
     bounty = Bounty()
     # act
     for i in range(1, 256):
-        bounty.add_file_artifact(mimetype="text/plain",
-                                 filename="file",
-                                 filesize=str(i),
-                                 sha256="74b4147957813b62cc8987f2b711ddb31f8cb46dcbf71502033da66053c8780a",
-                                 sha1="f013d66c7f6817d08b7eb2a93e6d0440c1f3e7f8",
-                                 md5="772ac1a55fab1122f3b369ee9cd31549",)
+        bounty.add_file_artifact(
+            mimetype="text/plain",
+            filename="file",
+            filesize=str(i),
+            sha256="74b4147957813b62cc8987f2b711ddb31f8cb46dcbf71502033da66053c8780a",
+            sha1="f013d66c7f6817d08b7eb2a93e6d0440c1f3e7f8",
+            md5="772ac1a55fab1122f3b369ee9cd31549",
+        )
     # assert
     assert Bounty.validate(bounty.dict())

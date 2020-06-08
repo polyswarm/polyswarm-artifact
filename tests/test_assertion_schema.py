@@ -1,17 +1,16 @@
 import json
 
 import pytest
+
 from polyswarmartifact.schema.assertion import Assertion
 from polyswarmartifact.schema.verdict import Verdict
 
 
 def test_valid_blob_validates_true():
     # arrange
-    blob = [
-        {
-            "malware_family": "Eicar",
-        }
-    ]
+    blob = [{
+        "malware_family": "Eicar",
+    }]
     # act
     result = Assertion.validate(blob)
     # assert
@@ -20,11 +19,9 @@ def test_valid_blob_validates_true():
 
 def test_invalid_scanner_validates_false():
     # arrange
-    blob = [
-        {
-            "malware_familty": None,
-        }
-    ]
+    blob = [{
+        "malware_familty": None,
+    }]
     # act
     result = Assertion.validate(blob)
     # assert

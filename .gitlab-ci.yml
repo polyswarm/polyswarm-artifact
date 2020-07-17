@@ -78,19 +78,3 @@ release-pypi:
 ###############################################################
 # Trigger other CI builds
 ###############################################################
-
-rebuild-polyswarm-models:
-  stage: trigger
-  only:
-    - master
-  trigger: externalci/polyswarm-models
-  variables:
-    BASE_IMAGE_NAME: polyswarm-models
-
-rebuild-polyswarm-transaction:
-  stage: trigger
-  only:
-    - master
-  trigger: externalci/polyswarm-transaction
-  variables:
-    BASE_IMAGE_NAME: polyswarm-transaction

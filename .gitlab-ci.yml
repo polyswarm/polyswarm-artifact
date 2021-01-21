@@ -10,7 +10,10 @@ stages:
   - trigger
 
 variables:
-  DOCKER_HOST: tcp://localhost:2375/
+  DOCKER_HOST: tcp://localhost:2376
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_TLS_VERIFY: 1
+  DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
 
 default:
   before_script:
@@ -23,7 +26,7 @@ default:
 ###############################################################
 dev-pypi:
   tags:
-    - kube
+    - kube-small-new
   stage: build
   before_script:
     - pip3 install -q --upgrade pip setuptools twine wheel bump2version
@@ -39,7 +42,7 @@ test-py36:
   image: python:3.6
   stage: test
   tags:
-    - kube
+    - kube-small-new
   before_script:
     - pip3 install tox
   script:
@@ -51,19 +54,32 @@ test-py37:
   image: python:3.7
   stage: test
   tags:
-    - kube
+    - kube-small-new
   before_script:
     - pip3 install tox
   script:
     - tox -e py37
   except:
     - images
+
+test-py38:
+  image: python:3.8
+  stage: test
+  tags:
+    - kube-small-new
+  before_script:
+    - pip3 install tox
+  script:
+    - tox -e py38
+  except:
+    - images
+
 ###############################################################
 # Release Stage
 ###############################################################
 release-pypi:
   tags:
-    - kube
+    - kube-small-new
   stage: release
   script:
     # release to internal pypi but do not tag yet

@@ -1,6 +1,6 @@
 bumpversion
 coverage==5.0.4
-pydantic~=1.6.1
+pydantic~=1.6.2
 pytest==5.4.1
 pytest-runner==5.2
 pytest-cov==2.9.0

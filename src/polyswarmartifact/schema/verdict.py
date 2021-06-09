@@ -28,7 +28,7 @@ class StixSignature(Schema):
         return super().dict(**kwargs)
 
 
-class Verdict(Schema):
+class ScanMetadata(Schema):
     malware_family: StrictStr = Field(
         default=...,
         description='name of the malware family specified by this microengine',
@@ -95,3 +95,7 @@ class Verdict(Schema):
 
     class Config:
         extra = 'allow'
+
+
+class Verdict(ScanMetadata):
+    pass

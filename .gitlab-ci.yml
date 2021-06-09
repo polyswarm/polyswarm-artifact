@@ -39,7 +39,7 @@ dev-pypi:
 # Test Stage
 ###############################################################
 test-py36:
-  image: python:3.6
+  image: $REPO_URL/python:3.6
   stage: test
   tags:
     - kube-small-new
@@ -51,7 +51,7 @@ test-py36:
     - images
 
 test-py37:
-  image: python:3.7
+  image: $REPO_URL/python:3.7
   stage: test
   tags:
     - kube-small-new
@@ -63,7 +63,7 @@ test-py37:
     - images
 
 test-py38:
-  image: python:3.8
+  image: $REPO_URL/python:3.8
   stage: test
   tags:
     - kube-small-new

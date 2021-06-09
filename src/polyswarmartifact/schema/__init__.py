@@ -8,6 +8,7 @@ __all__ = [
     'Bounty',
     'Schema',
     'Verdict',
+    'ScanMetadata',
     'FileArtifact',
     'URLArtifact',
     'Scanner',

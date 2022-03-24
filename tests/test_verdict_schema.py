@@ -35,7 +35,7 @@ def test_reset_malware_family():
     assert verdict.malware_family == "Trojan"
 
 
-def test_validate_no_familty():
+def test_validate_no_family():
     # arrange
     verdict = Verdict()
     # assert

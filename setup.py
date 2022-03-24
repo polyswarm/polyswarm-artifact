@@ -8,7 +8,7 @@ with open('README.md', 'r') as readme:
 
 setup(
     name='polyswarm-artifact',
-    version='1.4.3',
+    version='1.4.4',
     description='Library containing artifact type enums and functions',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -17,7 +17,7 @@ setup(
     url='https://github.com/polyswarm/polyswarm-artifact',
     license='MIT',
     python_requires='>=3.6.8',
-    install_requires=['pydantic'],
+    install_requires=['pydantic<1.9'],
     setup_requires=['pytest-runner'],
     tests_require=[
         'pytest==5.4.1',
@@ -36,6 +36,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: Implementation :: PyPy',
     ]
 )

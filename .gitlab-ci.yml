@@ -1,19 +1,10 @@
 image: $REPO_URL/stage
 
-services:
-  - $REPO_URL/docker:dind
-
 stages:
   - build
   - test
   - release
   - trigger
-
-variables:
-  DOCKER_HOST: tcp://localhost:2376
-  DOCKER_TLS_CERTDIR: "/certs"
-  DOCKER_TLS_VERIFY: 1
-  DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
 
 default:
   before_script:
@@ -38,44 +29,8 @@ dev-pypi:
 ###############################################################
 # Test Stage
 ###############################################################
-test-py36:
-  image: $REPO_URL/python:3.6-stretch
-  stage: test
-  tags:
-    - kube-small-new
-  before_script:
-    - pip3 install tox
-  script:
-    - tox -e py36
-  except:
-    - images
-
-test-py37:
-  image: $REPO_URL/python:3.7-slim-buster
-  stage: test
-  tags:
-    - kube-small-new
-  before_script:
-    - pip3 install tox
-  script:
-    - tox -e py37
-  except:
-    - images
-
-test-py38:
-  image: $REPO_URL/python:3.8-slim-buster
-  stage: test
-  tags:
-    - kube-small-new
-  before_script:
-    - pip3 install tox
-  script:
-    - tox -e py38
-  except:
-    - images
-
 test-py39:
-  image: $REPO_URL/python:3.9-slim-bullseye
+  image: $REPO_URL/public/docker/library/python:3.9-slim-bullseye
   stage: test
   tags:
     - kube-small-new
@@ -83,6 +38,18 @@ test-py39:
     - pip3 install tox
   script:
     - tox -e py39
+  except:
+    - images
+
+test-py310:
+  image: $REPO_URL/public/docker/library/python:3.10-slim-bullseye
+  stage: test
+  tags:
+    - kube-small-new
+  before_script:
+    - pip3 install tox
+  script:
+    - tox -e py310
   except:
     - images
 

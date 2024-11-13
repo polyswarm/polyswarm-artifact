@@ -12,7 +12,7 @@ def test_valid_blob_validates_true():
         }
     ]
     # act
-    result = Bounty.validate(blob)
+    result = Bounty.model_validate(blob)
     # assert
     assert result
 
@@ -25,7 +25,7 @@ def test_invalid_scanner_validates_false():
         }
     ]
     # act
-    result = Bounty.validate(blob)
+    result = Bounty.model_validate(blob)
     # assert
     assert not result
 
@@ -47,13 +47,13 @@ def test_add_url_artifact():
     bounty = Bounty()
     artifact = {
         "protocol": "https://",
-        "uri": 'https://google.com'
+        "uri": 'https://google.com/'
     }
     # act
-    bounty.add_url_artifact(protocol="https://", uri='google.com')
+    bounty.add_url_artifact(protocol="https://", uri='google.com/')
     # assert
-    assert bounty.artifacts and bounty.artifacts[0] == artifact
-    assert bounty.json() == json.dumps([artifact])
+    assert bounty.artifacts and bounty.artifacts[0].json() == json.dumps(artifact, separators=(',', ':'))
+    assert bounty.json() == json.dumps([artifact], separators=(',', ':'))
 
 
 @pytest.mark.skip
@@ -134,7 +134,7 @@ def test_builder_one_scanners_is_valid():
     bounty = Bounty() \
         .add_file_artifact(mimetype="text/plain")
     # assert
-    assert Bounty.validate(bounty.dict())
+    assert Bounty.model_validate(bounty.dict())
 
 
 def test_builder_256_scanners_is_valid():
@@ -149,4 +149,4 @@ def test_builder_256_scanners_is_valid():
                                  sha1="f013d66c7f6817d08b7eb2a93e6d0440c1f3e7f8",
                                  md5="772ac1a55fab1122f3b369ee9cd31549",)
     # assert
-    assert Bounty.validate(bounty.dict())
+    assert Bounty.model_validate(bounty.dict())

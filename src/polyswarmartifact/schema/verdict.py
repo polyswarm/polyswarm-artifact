@@ -1,18 +1,19 @@
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-from pydantic import Field, IPvAnyAddress, StrictStr
+from pydantic import Field, IPvAnyAddress, StrictStr, ConfigDict
 
 from .schema import Domain, Schema, VersionStr, chainable
 
 
 class Scanner(Schema):
     version: Optional[VersionStr] = Field(
-        description="version of the microengine that generated the assertion"
+        description="version of the microengine that generated the assertion",
+        default = None,
     )
-    polyswarmclient_version: Optional[VersionStr] = Field(description="version of polyswarmclient")
-    vendor_version: Optional[str] = Field(description="version of the engine that generated the assertion")
-    signatures_version: Optional[str] = Field(description="version of the engine's antimalware signatures")
-    environment: Optional[Dict[str, Any]] = Field(description="analysis environment metadata")
+    polyswarmclient_version: Optional[VersionStr] = Field(description="version of polyswarmclient", default=None)
+    vendor_version: Optional[str] = Field(description="version of the engine that generated the assertion", default=None)
+    signatures_version: Optional[str] = Field(description="version of the engine's antimalware signatures", default=None)
+    environment: Optional[Dict[str, Any]] = Field(description="analysis environment metadata", default=None)
 
 
 class StixSignature(Schema):
@@ -29,6 +30,8 @@ class StixSignature(Schema):
 
 
 class ScanMetadata(Schema):
+    model_config = ConfigDict(populate_by_name=True, extra='allow')
+
     malware_family: StrictStr = Field(
         default=...,
         description='name of the malware family specified by this microengine',
@@ -36,12 +39,12 @@ class ScanMetadata(Schema):
     domains: Optional[List[Domain]] = []
     ip_addresses: Optional[List[IPvAnyAddress]] = []
     stix: Optional[List[StixSignature]] = []
-    scanner: Optional[Scanner]
-    heuristic: Optional[bool] = Field(description='indicator for assertions generated from heuristics')
+    scanner: Optional[Scanner] = None
+    heuristic: Optional[bool] = Field(description='indicator for assertions generated from heuristics', default=None)
 
     @property
     def extra(self):
-        return [(k, v) for k, v in self.__dict__.items() if k not in self.__fields__]
+        return [(k, v) for k, v in self.__dict__.items() if k not in self.model_fields]
 
     @chainable
     def add_domain(self, domain: Domain):
@@ -92,9 +95,6 @@ class ScanMetadata(Schema):
             scanner.setdefault('environment', {}).update(environment)
         self.scanner = Scanner(**scanner)
         return self
-
-    class Config:
-        extra = 'allow'
 
 
 class Verdict(ScanMetadata):

@@ -5,19 +5,19 @@ from pydantic import (
     Field,
     PositiveInt,
     StrictStr,
-    validator,
+    RootModel
 )
 
 from .schema import MD5, SHA1, SHA256, Schema
 
 
 class FileArtifact(Schema):
-    filename: Optional[str]
-    filesize: Optional[PositiveInt]
-    mimetype: StrictStr = ...
-    sha256: Optional[SHA256] = Field(title='SHA256')
-    sha1: Optional[SHA1] = Field(title='SHA1')
-    md5: Optional[MD5] = Field(title='MD5')
+    filename: Optional[str] = None
+    filesize: Optional[PositiveInt] = None
+    mimetype: StrictStr
+    sha256: Optional[SHA256] = Field(title='SHA256', default=None)
+    sha1: Optional[SHA1] = Field(title='SHA1', default=None)
+    md5: Optional[MD5] = Field(title='MD5', default=None)
 
 
 class URLArtifact(Schema):
@@ -31,15 +31,15 @@ class URLArtifact(Schema):
             self.protocol = self.uri.protocol
 
 
-class Bounty(Schema):
-    __root__: List[Union[FileArtifact, URLArtifact]] = Field(min_items=1, max_items=256, default=[])
+class Bounty(RootModel, Schema):
+    root: List[Union[FileArtifact, URLArtifact]] = Field(min_items=1, max_items=256, default=[])
 
     @property
     def artifacts(self):
-        return self.__root__
+        return self.root
 
     def add_file_artifact(self, **kwargs):
-        self.__root__.append(FileArtifact(**kwargs))
+        self.root.append(FileArtifact(**kwargs))
         return self
 
     def add_url_artifact(self, uri: str = None, protocol: str = None):
@@ -48,11 +48,11 @@ class Bounty(Schema):
         if protocol is not None:
             proto, *_ = protocol.rsplit('://', 1)
             uri = '{}://{}'.format(proto, next(reversed(uri.split('://', 1))))
-        self.__root__.append(URLArtifact(uri=str(uri), protocol=protocol))
+        self.root.append(URLArtifact(uri=str(uri), protocol=protocol))
         return self
 
     def __iter__(self):
-        return iter(self.__root__)
+        return iter(self.root)
 
     def __getitem__(self, item):
-        return self.__root__[item]
+        return self.root[item]

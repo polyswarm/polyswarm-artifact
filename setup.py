@@ -16,7 +16,7 @@ setup(
     author_email='info@polyswarm.io',
     url='https://github.com/polyswarm/polyswarm-artifact',
     license='MIT',
-    python_requires='>=3.8',
+    python_requires='>=3.9',
     install_requires=['pydantic'],
     setup_requires=['pytest-runner'],
     tests_require=[

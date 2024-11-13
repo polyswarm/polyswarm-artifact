@@ -50,7 +50,7 @@ def test_validate_with_family():
     # assert
     blob = verdict.json()
     # act
-    assert Verdict.validate(json.loads(blob))
+    assert Verdict.model_validate(json.loads(blob))
 
 
 def test_add_domain():
@@ -87,7 +87,7 @@ def test_validate_domains():
     # act
     verdict.add_domain('polyswarm.io')
     # assert
-    assert Verdict.validate(json.loads(verdict.json()))
+    assert Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_validate_two_domains_at_once():
@@ -96,7 +96,7 @@ def test_validate_two_domains_at_once():
     # act
     verdict.add_domains(['polyswarm.io', 'polyswarm.network'])
     # assert
-    assert Verdict.validate(json.loads(verdict.json()))
+    assert Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_add_ip():
@@ -133,7 +133,7 @@ def test_validate_ip():
     # act
     verdict.add_ip_address('192.168.0.1')
     # assert
-    assert Verdict.validate(json.loads(verdict.json()))
+    assert Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_validate_two_ip_at_once():
@@ -142,7 +142,7 @@ def test_validate_two_ip_at_once():
     # act
     verdict.add_ip_addresses(['192.168.0.1', '8.8.8.8'])
     # assert
-    assert Verdict.validate(json.loads(verdict.json()))
+    assert Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_validate_ip_invalid():
@@ -238,7 +238,7 @@ def test_validate_stix_object():
             "phase_name": "full"
         })
     # assert
-    assert Verdict.validate(json.loads(verdict.json()))
+    assert Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_validate_two_stix_sigs_at_once():
@@ -254,7 +254,7 @@ def test_validate_two_stix_sigs_at_once():
             "phase_name": "full"
         })])
     # assert
-    assert Verdict.validate(json.loads(verdict.json()))
+    assert Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_set_scanner_os():
@@ -350,7 +350,7 @@ def test_validate_scanner():
     verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version="2.0.2",
                         signatures_version="2019", vendor_version="1.0.0")
     # assert
-    Verdict.validate(json.loads(verdict.json()))
+    Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_no_version():
@@ -360,7 +360,7 @@ def test_scanner_no_version():
     verdict.set_scanner(operating_system="windows", architecture="x86", polyswarmclient_version="2.0.2",
                         signatures_version="2019", vendor_version="1.0.0")
     # assert
-    Verdict.validate(json.loads(verdict.json()))
+    Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_null_version():
@@ -370,7 +370,7 @@ def test_scanner_null_version():
     verdict.set_scanner(operating_system="windows", architecture="x86", version=None, polyswarmclient_version="2.0.2",
                         signatures_version="2019", vendor_version="1.0.0")
     # assert
-    Verdict.validate(json.loads(verdict.json()))
+    Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_invalid_version():
@@ -381,7 +381,7 @@ def test_scanner_invalid_version():
         # act
         verdict.set_scanner(operating_system="windows", architecture="x86", version="asdf", polyswarmclient_version="2.0.2",
                             signatures_version="2019", vendor_version="1.0.0")
-        Verdict.validate(json.loads(verdict.json()))
+        Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_no_psc_version():
@@ -391,7 +391,7 @@ def test_scanner_no_psc_version():
     verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0",
                         signatures_version="2019", vendor_version="1.0.0")
     # act
-    Verdict.validate(json.loads(verdict.json()))
+    Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_null_psc_version():
@@ -401,7 +401,7 @@ def test_scanner_null_psc_version():
     verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version=None,
                         signatures_version="2019", vendor_version="1.0.0")
     # assert
-    Verdict.validate(json.loads(verdict.json()))
+    Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_invalid_psc_version():
@@ -412,7 +412,7 @@ def test_scanner_invalid_psc_version():
         # act
         verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version="asdf",
                             signatures_version="2019", vendor_version="1.0.0")
-        Verdict.validate(json.loads(verdict.json()))
+        Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_no_signature_version():
@@ -422,7 +422,7 @@ def test_scanner_no_signature_version():
     verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version="2.0.2",
                         vendor_version="1.0.0")
     # assert
-    Verdict.validate(json.loads(verdict.json()))
+    Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_null_signature_version():
@@ -432,7 +432,7 @@ def test_scanner_null_signature_version():
     verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version="2.0.2",
                         signatures_version=None, vendor_version="1.0.0")
     # assert
-    Verdict.validate(json.loads(verdict.json()))
+    Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_no_vendor_version():
@@ -442,7 +442,7 @@ def test_scanner_no_vendor_version():
     verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version="2.0.2",
                         signatures_version="2019")
     # assert
-    Verdict.validate(json.loads(verdict.json()))
+    Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_null_vendor_version():
@@ -452,7 +452,7 @@ def test_scanner_null_vendor_version():
     verdict.set_scanner(operating_system="windows", architecture="x86", version="1.0.0", polyswarmclient_version="2.0.2",
                         signatures_version="2019", vendor_version=None)
     # assert
-    Verdict.validate(json.loads(verdict.json()))
+    Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_null_environemnt():
@@ -462,7 +462,7 @@ def test_scanner_null_environemnt():
     verdict.set_scanner(version="1.0.0", polyswarmclient_version="2.0.2",
                         signatures_version="2019", vendor_version="1.0.0")
     # assert
-    Verdict.validate(json.loads(verdict.json()))
+    Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_environemnt_no_os():
@@ -472,7 +472,7 @@ def test_scanner_environemnt_no_os():
     verdict.set_scanner(architecture="x86", version="1.0.0", polyswarmclient_version="2.0.2",
                         signatures_version="2019", vendor_version="1.0.0")
     # assert
-    Verdict.validate(json.loads(verdict.json()))
+    Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_environemnt_null_os():
@@ -482,7 +482,7 @@ def test_scanner_environemnt_null_os():
     verdict.set_scanner(operating_system=None, architecture="x86", version="1.0.0", polyswarmclient_version="2.0.2",
                         signatures_version="2019", vendor_version="1.0.0")
     # assert
-    Verdict.validate(json.loads(verdict.json()))
+    Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_environemnt_no_arch():
@@ -492,7 +492,7 @@ def test_scanner_environemnt_no_arch():
     verdict.set_scanner(operating_system="windows", version="1.0.0", polyswarmclient_version="2.0.2",
                         signatures_version="2019", vendor_version="1.0.0")
     # assert
-    Verdict.validate(json.loads(verdict.json()))
+    Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_scanner_environemnt_null_arch():
@@ -502,7 +502,7 @@ def test_scanner_environemnt_null_arch():
     verdict.set_scanner(operating_system="windows", architecture="None", version="1.0.0",
                         polyswarmclient_version="2.0.2", signatures_version="2019", vendor_version="1.0.0")
     # assert
-    Verdict.validate(json.loads(verdict.json()))
+    Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_add_extra_string():
@@ -511,9 +511,7 @@ def test_add_extra_string():
     # act
     verdict.add_extra("new_key", "string_value")
     # assert
-    k, v = verdict.extra[0]
-    assert k == 'new_key'
-    assert v == "string_value"
+    assert verdict.model_extra['new_key'] == "string_value"
 
 
 def test_add_extra_array():
@@ -522,9 +520,7 @@ def test_add_extra_array():
     # act
     verdict.add_extra("new_key", ["string_value"])
     # assert
-    k, v = verdict.extra[0]
-    assert k == 'new_key'
-    assert v == ["string_value"]
+    assert verdict.model_extra['new_key'] == ["string_value"]
 
 
 def test_add_extra_object():
@@ -533,9 +529,7 @@ def test_add_extra_object():
     # act
     verdict.add_extra("new_key", {"other_key": "string_value"})
     # assert
-    k, v = verdict.extra[0]
-    assert k == 'new_key'
-    assert v == {"other_key": "string_value"}
+    assert verdict.model_extra['new_key'] == {"other_key": "string_value"}
 
 
 def test_add_two_extras_at_once():
@@ -544,12 +538,8 @@ def test_add_two_extras_at_once():
     # act
     verdict.add_extras([("new_key", "string_value"), ("new_key1", {"other_key": "string_value"})])
     # assert
-    k, v = verdict.extra[0]
-    assert k == 'new_key'
-    assert v == "string_value"
-    k, v = verdict.extra[1]
-    assert k == 'new_key1'
-    assert v == {"other_key": "string_value"}
+    assert verdict.model_extra['new_key'] == 'string_value'
+    assert verdict.model_extra['new_key1'] == {"other_key": "string_value"}
 
 
 def test_validate_extra_string():
@@ -558,7 +548,7 @@ def test_validate_extra_string():
     # act
     verdict.add_extra("new_key", "string_value")
     # assert
-    assert Verdict.validate(json.loads(verdict.json()))
+    assert Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_validate_extra_array():
@@ -567,7 +557,7 @@ def test_validate_extra_array():
     # act
     verdict.add_extra("new_key", ["string_value"])
     # assert
-    assert Verdict.validate(json.loads(verdict.json()))
+    assert Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_validate_extra_object():
@@ -576,7 +566,7 @@ def test_validate_extra_object():
     # act
     verdict.add_extra("new_key", {"other_key": "string_value"})
     # assert
-    assert Verdict.validate(json.loads(verdict.json()))
+    assert Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_validate_two_extra_at_once():
@@ -585,7 +575,7 @@ def test_validate_two_extra_at_once():
     # act
     verdict.add_extras([("new_key", "string_value"), ("new_key1", {"other_key": "string_value"})])
     # assert
-    assert Verdict.validate(json.loads(verdict.json()))
+    assert Verdict.model_validate(json.loads(verdict.json()))
 
 
 def test_validate_all_output():
@@ -630,7 +620,7 @@ def test_validate_all_output():
     # act
     blob = json.loads(verdict.json())
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
     assert blob == result
 
 def test_empty_domain_list():
@@ -656,7 +646,7 @@ def test_empty_domain_list():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_none_domain_list():
@@ -682,7 +672,7 @@ def test_none_domain_list():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_empty_ip_list():
@@ -708,7 +698,7 @@ def test_empty_ip_list():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_none_ip_list():
@@ -734,7 +724,7 @@ def test_none_ip_list():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_empty_stix_list():
@@ -757,7 +747,7 @@ def test_empty_stix_list():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_none_stix_list():
@@ -780,7 +770,7 @@ def test_none_stix_list():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_empty_scanner():
@@ -796,7 +786,7 @@ def test_empty_scanner():
         "scanner": {}
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_none_scanner():
@@ -812,7 +802,7 @@ def test_none_scanner():
         "scanner": None,
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_empty_environment():
@@ -835,7 +825,7 @@ def test_empty_environment():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_none_environment():
@@ -858,7 +848,7 @@ def test_none_environment():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_extra_string_scanner():
@@ -884,7 +874,7 @@ def test_extra_string_scanner():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_extra_array_scanner():
@@ -910,7 +900,7 @@ def test_extra_array_scanner():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_extra_object_scanner():
@@ -936,7 +926,7 @@ def test_extra_object_scanner():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_extra_string_stix():
@@ -962,7 +952,7 @@ def test_extra_string_stix():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_extra_array_stix():
@@ -988,7 +978,7 @@ def test_extra_array_stix():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_extra_object_stix():
@@ -1014,7 +1004,7 @@ def test_extra_object_stix():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_extra_string_environment():
@@ -1040,7 +1030,7 @@ def test_extra_string_environment():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_extra_array_environment():
@@ -1066,7 +1056,7 @@ def test_extra_array_environment():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)
 
 
 def test_extra_object_environment():
@@ -1092,4 +1082,4 @@ def test_extra_object_environment():
         },
     }
     # assert
-    assert Verdict.validate(blob)
+    assert Verdict.model_validate(blob)

@@ -1,28 +1,28 @@
 from typing import List
 
-from pydantic import Field
+from pydantic import Field, RootModel
 
 from .schema import Schema, chainable
 from .verdict import Verdict
 
 
-class Assertion(Schema):
-    __root__: List[Verdict] = Field(min_items=1, max_items=256, default=[])
+class Assertion(RootModel, Schema):
+    root: List[Verdict] = Field(min_items=1, max_items=256, default=[])
 
     @property
     def artifacts(self):
-        return self.__root__
+        return self.root
 
     @chainable
     def add_artifact(self, verdict: Verdict):
-        self.__root__.append(verdict)
+        self.root.append(verdict)
 
     @chainable
     def add_artifacts(self, verdicts: List[Verdict]):
-        self.__root__.extend(verdicts)
+        self.root.extend(verdicts)
 
     def __iter__(self):
-        return iter(self.__root__)
+        return iter(self.root)
 
     def __getitem__(self, item):
-        return self.__root__[item]
+        return self.root[item]

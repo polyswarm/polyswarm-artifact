@@ -13,7 +13,7 @@ def test_valid_blob_validates_true():
         }
     ]
     # act
-    result = Assertion.validate(blob)
+    result = Assertion.model_validate(blob)
     # assert
     assert result
 
@@ -26,15 +26,14 @@ def test_invalid_scanner_validates_false():
         }
     ]
     # act
-    result = Assertion.validate(blob)
+    result = Assertion.model_validate(blob)
     # assert
     assert not result
 
 
 def test_add_artifact():
     # arrange
-    artifact = Verdict() \
-        .set_malware_family("Eicar")
+    artifact = Verdict().set_malware_family("Eicar")
     assertion = Assertion()
     # act
     assertion.add_artifact(artifact)
@@ -65,11 +64,9 @@ def test_builder_no_artifacts_throws_value_error():
 
 def test_invalid_artifact_throws_value_error():
     # arrange
-    artifact = Verdict()\
-        .add_domain("polyswarm.io")
+    artifact = Verdict().add_domain("polyswarm.io")
     # act
-    assertion = Assertion()\
-        .add_artifact(artifact)
+    assertion = Assertion().add_artifact(artifact)
     # assert
     with pytest.raises(ValueError):
         assertion.json()
@@ -93,7 +90,7 @@ def test_builder_one_scanners_is_valid():
     assertion = Assertion()\
         .add_artifact(artifact)
     # assert
-    assert Assertion.validate(json.loads(assertion.json()))
+    assert Assertion.model_validate(json.loads(assertion.json()))
 
 
 def test_builder_256_scanners_is_valid():
@@ -105,4 +102,4 @@ def test_builder_256_scanners_is_valid():
     for i in range(0, 256):
         assertion.add_artifact(artifact)
     # assert
-    assert Assertion.validate(json.loads(assertion.json()))
+    assert Assertion.model_validate(json.loads(assertion.json()))

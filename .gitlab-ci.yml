@@ -29,30 +29,6 @@ dev-pypi:
 ###############################################################
 # Test Stage
 ###############################################################
-test-py36:
-  image: $REPO_URL/python:3.6-stretch
-  stage: test
-  tags:
-    - kube-small-new
-  before_script:
-    - pip3 install tox
-  script:
-    - tox -e py36
-  except:
-    - images
-
-test-py37:
-  image: $REPO_URL/python:3.7-slim-buster
-  stage: test
-  tags:
-    - kube-small-new
-  before_script:
-    - pip3 install tox
-  script:
-    - tox -e py37
-  except:
-    - images
-
 test-py38:
   image: $REPO_URL/python:3.8-slim-buster
   stage: test

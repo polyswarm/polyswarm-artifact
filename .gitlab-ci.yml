@@ -20,38 +20,47 @@ dev-pypi:
     - stage-kube-newer
   stage: build
   before_script:
-    - pip3 install -q --upgrade pip setuptools twine wheel bump2version
+    - pip3 install -q --upgrade pip build twine bump-my-version
   script:
-    - SHORT_SHA=$(git rev-parse --short HEAD) bumpversion --no-commit --no-tag local
-    - python setup.py -q bdist_wheel
+    - bump-my-version bump --no-commit --no-tag dev
+    - python -m build
     - twine upload --skip-existing --disable-progress-bar --non-interactive dist/*
 
 ###############################################################
 # Test Stage
 ###############################################################
-test-py39:
-  image: $REPO_URL/public/docker/library/python:3.9-slim-bullseye
-  stage: test
+test-run310:
   tags:
     - stage-kube-newer
+  image: python:3.10
+  stage: test
   before_script:
-    - pip3 install tox
+    - pip install --upgrade pip
   script:
-    - tox -e py39
-  except:
-    - images
+    - pip install .[tests]
+    - pytest
 
-test-py310:
-  image: $REPO_URL/public/docker/library/python:3.10-slim-bullseye
-  stage: test
+test-run311:
   tags:
     - stage-kube-newer
+  image: python:3.11
+  stage: test
   before_script:
-    - pip3 install tox
+    - pip install --upgrade pip
   script:
-    - tox -e py310
-  except:
-    - images
+    - pip install .[tests]
+    - pytest
+
+test-run312:
+  tags:
+    - stage-kube-newer
+  image: python:3.12
+  stage: test
+  before_script:
+    - pip install --upgrade pip
+  script:
+    - pip install .[tests]
+    - pytest
 
 ###############################################################
 # Release Stage
@@ -65,10 +74,10 @@ release-pypi:
     - e2e release --skip-tag --remote https://github.com/polyswarm/$CI_PROJECT_NAME.git
     # release to public pypi and tag
     - e2e release
-      -u $PUBLIC_TWINE_USERNAME
-      -p $PUBLIC_TWINE_PASSWORD
-      -r $PUBLIC_TWINE_REPOSITORY_URL
-      --remote https://github.com/polyswarm/$CI_PROJECT_NAME.git
+      -u "$PUBLIC_TWINE_USERNAME"
+      -p "$PUBLIC_TWINE_PASSWORD"
+      -r "$PUBLIC_TWINE_REPOSITORY_URL"
+      --remote "https://github.com/polyswarm/$CI_PROJECT_NAME.git"
 
 ###############################################################
 # Trigger other CI builds

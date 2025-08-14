@@ -1,8 +1,0 @@
-bumpversion
-coverage
-pydantic
-pytest
-pytest-runner
-pytest-cov
-pytest-asyncio
-pytest-timeout

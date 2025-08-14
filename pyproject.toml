@@ -1,3 +1,174 @@
 [build-system]
 requires = ["setuptools >= 64"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "polyswarm_artifact"
+version = "2.0.0"
+description = "Library containing artifact type enums and functions"
+readme = "README.md"
+authors = [{ name = "PolySwarm Developers", email = "info@polyswarm.io" }]
+license = { text = "MIT" }
+requires-python = ">=3.10,<4"
+classifiers = [
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+  "pydantic",
+]
+
+[project.urls]
+Homepage = "https://github.com/polyswarm/polyswarm-artifact"
+Repository = "https://github.com/polyswarm/polyswarm-artifact"
+
+[project.optional-dependencies]
+tests = [
+  "bump-my-version~=1.2",
+  "pytest",
+  "coverage",
+  "pytest-runner",
+  "pytest-cov",
+  "pytest-asyncio",
+  "pytest-timeout",
+]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-dir]
+"" = "src"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.bumpversion]
+current_version = "2.0.0"
+commit = true
+tag = false
+sign_tags = true
+tag_name = "{new_version}"
+parse = '^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:\.dev(?P<dev>\d+))?(?:\+(?P<local>[a-z0-9]+(?:\.[a-z0-9]+)*))?$'
+serialize = [
+  "{major}.{minor}.{patch}.dev{dev}+{short_commit_sha}",
+  "{major}.{minor}.{patch}"
+]
+
+[tool.bumpversion.parts.dev]
+first_value = "0"
+optional_value = "0"
+
+[[tool.bumpversion.files]]
+filename = "src/polyswarmartifact/__init__.py"
+search = "__version__ = '{current_version}'"
+replace = "__version__ = '{new_version}'"
+
+# -----------------------------
+# pytest (from [tool:pytest])
+# -----------------------------
+[tool.pytest.ini_options]
+log_cli = true
+log_cli_level = "DEBUG"
+log_format = "%(asctime)s %(levelname)-2s [%(name)s:%(filename)s:%(lineno)d:%(funcName)1s()] %(message)s"
+python_files = ["test_*.py", "*_test.py"]
+testpaths = ["tests"]
+norecursedirs = [
+    ".git",
+    ".idea",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+addopts = [
+    "--continue-on-collection-errors",
+    "-v",
+    "-s",
+    "-rxXs",
+]
+
+# -----------------------------
+# coverage.py (from [coverage:run])
+# -----------------------------
+[tool.coverage.run]
+source = ["src"]
+omit = ["env/*", "venv/*", ".env/*", ".venv/*"]
+
+# -----------------------------
+# isort
+# -----------------------------
+[tool.isort]
+atomic = true
+balanced_wrapping = true
+force_sort_within_sections = true
+from_first = false
+include_trailing_comma = true
+known_first_party = [
+  "polyswarm",
+  "polyswarmartifact",
+  "polyswarmclient",
+  "polyswarmcli",
+  "polyswarmapi",
+  "polyswarmmodels",
+  "polyunite",
+]
+known_standard_library = ["typing", "typing_extensions"]
+multi_line_output = 3
+use_parentheses = true
+
+# -----------------------------
+# flake8  (requires flake8>=7.0 to read pyproject.toml)
+# -----------------------------
+[tool.flake8]
+max-line-length = 119
+exclude = ["env", ".env", ".venv", "venv", "docs", "*.egg_info"]
+ignore = [
+  "E402",
+  "E266",
+  "E302",
+  "E261",
+  "E226",
+  "E262",
+  "E704",
+  "E251",
+  "W503",
+  "W504",
+  "E213",
+]
+
+# -----------------------------
+# mypy
+# -----------------------------
+[tool.mypy]
+cache_dir = ".mypy_cache"
+check_untyped_defs = true
+files = ["src/polyswarmartifact"]
+mypy_path = ["stubshed"]
+ignore_missing_imports = true
+incremental = true
+pretty = true
+python_version = "3.6"
+strict_equality = true
+strict_optional = false
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
+
+# -----------------------------
+# YAPF
+# -----------------------------
+[tool.yapf]
+based_on_style = "pep8"
+column_limit = 110
+allow_multiline_dictionary_keys = false
+align_closing_bracket_with_visual_indent = true
+arithmetic_precedence_indication = true
+coalesce_brackets = true
+dedent_closing_brackets = true
+indent_dictionary_value = true
+split_all_top_level_comma_separated_values = false
+split_before_dot = true

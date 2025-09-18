@@ -24,7 +24,7 @@ dev-pypi:
   script:
     - bump-my-version bump --no-commit --no-tag dev
     - python -m build
-    - twine upload --skip-existing --disable-progress-bar --non-interactive dist/*
+    - twine upload --disable-progress-bar --non-interactive dist/*
 
 ###############################################################
 # Test Stage

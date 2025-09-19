@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "polyswarm_artifact"
-version = "2.2.1"
+version = "2.2.2"
 description = "Library containing artifact type enums and functions"
 readme = "README.md"
 authors = [{ name = "PolySwarm Developers", email = "info@polyswarm.io" }]
@@ -47,7 +47,7 @@ include-package-data = true
 where = ["src"]
 
 [tool.bumpversion]
-current_version = "2.2.1"
+current_version = "2.2.2"
 commit = true
 tag = false
 sign_tags = true

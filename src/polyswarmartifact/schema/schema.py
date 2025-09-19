@@ -118,6 +118,20 @@ class Schema(BaseModel):
     @classmethod
     def model_validate(cls: Type['BaseModel'], value: Any, **kwargs) -> 'Union[Schema, bool]':
         try:
+            return BaseModel.model_validate.__func__(cls, value, **kwargs)
+        except ValidationError as e:
+            logger.error(e)
+            return False
+        return False
+
+    @classmethod
+    def _model_validate_old(cls: Type['BaseModel'], value: Any, **kwargs) -> 'Union[Schema, bool]':
+        """
+        Previous version of model_validate
+
+        Kept to make easier to keep compatibility where needed
+        """
+        try:
             BaseModel.model_validate.__func__(cls, value)
         except ValidationError as e:
             logger.error(e)

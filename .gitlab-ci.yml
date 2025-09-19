@@ -20,11 +20,11 @@ dev-pypi:
     - stage-kube-newer
   stage: build
   before_script:
-    - pip3 install -q --upgrade pip build twine bump-my-version "click<8.3"
+    - pip3 install -q --upgrade pip build "twine<6.2" bump-my-version "click<8.3"
   script:
     - bump-my-version bump --no-commit --no-tag dev
     - python -m build
-    - twine upload --disable-progress-bar --non-interactive dist/*
+    - twine upload --skip-existing --disable-progress-bar --non-interactive dist/*
 
 ###############################################################
 # Test Stage

@@ -3,7 +3,7 @@
 [![pipeline status](https://gitlab.polyswarm.io/externalci/polyswarm-artifact/badges/master/pipeline.svg)](https://gitlab.polyswarm.io/externalci/polyswarm-artifact/commits/master)
 [![coverage report](https://gitlab.polyswarm.io/externalci/polyswarm-artifact/badges/master/coverage.svg)](https://gitlab.polyswarm.io/externalci/polyswarm-artifact/commits/master)
 
-Python package for mapping artifact types to the ArtifactType enum in the BountyRegistry contract.
+Python package for mapping artifact types to the `ArtifactType` enum in the `BountyRegistry` contract.
 
 Supports python3 >= 3.10.
 
@@ -50,4 +50,3 @@ Schema objects possess the following methods and attributes:
     a dictionary of the model's fields
 ``__config__``
     the configuration class for the model
-

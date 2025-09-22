@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools >= 64"]
+requires = ["setuptools >= 64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "polyswarm_artifact"
-version = "2.2.2"
+version = "2.2.3"
 description = "Library containing artifact type enums and functions"
 readme = "README.md"
 authors = [{ name = "PolySwarm Developers", email = "info@polyswarm.io" }]
@@ -47,7 +47,7 @@ include-package-data = true
 where = ["src"]
 
 [tool.bumpversion]
-current_version = "2.2.2"
+current_version = "2.2.3"
 commit = true
 tag = false
 sign_tags = true

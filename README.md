@@ -5,7 +5,7 @@
 
 Python package for mapping artifact types to the ArtifactType enum in the BountyRegistry contract.
 
-Supports python3 >=3.5.2 and >=3.6.5.
+Supports python3 >= 3.10.
 
 # Versions in this schema
 
@@ -18,7 +18,7 @@ Since we cannot remove fields, when a field is no longer useful, it needs to be 
 Unfortunately we cannot add nullable at a later date, as that would invalidate new schemas when being read by an old  
 
 We can easily remove required fields, but we cannot add more. 
-Doing so would invalidated old schemas.  
+Doing so would invalidate old schemas.  
 
 ## Schema object
 

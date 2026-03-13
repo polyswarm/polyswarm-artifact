@@ -1,4 +1,7 @@
-image: $REPO_URL/stage
+include:
+  - project: 'externalci/ci-image'
+    ref: master
+    file: '.gitlab-ci-default.yaml'
 
 stages:
   - build
@@ -6,31 +9,17 @@ stages:
   - release
   - trigger
 
-default:
-  before_script:
-    - pip install -q --upgrade pip
-    - pip install -q $END_TO_END_LIB@$CI_COMMIT_REF_NAME || pip install -q $END_TO_END_LIB
-    - e2e init
+###############################################################
+# Build Stage
+###############################################################
 
-###############################################################
-# Build Stage (jobs inside a stage run in parallel)
-###############################################################
 dev-pypi:
-  tags:
-    - stage-kube-newer
-  stage: build
-  before_script:
-    - pip3 install -q --upgrade pip build twine bump-my-version "click<8.3"
-    - pip install -q $END_TO_END_LIB@$CI_COMMIT_REF_NAME || pip install -q $END_TO_END_LIB
-    - e2e init
-  script:
-    - bump-my-version bump --no-commit --no-tag dev
-    - python -m build
-    - e2e release --dev --skip-tag
+  extends: .dev-pypi
 
 ###############################################################
 # Test Stage
 ###############################################################
+
 test-run310:
   tags:
     - stage-kube-newer
@@ -67,20 +56,6 @@ test-run312:
 ###############################################################
 # Release Stage
 ###############################################################
-release-pypi:
-  tags:
-    - stage-kube-newer
-  stage: release
-  script:
-    # release to internal pypi but do not tag yet
-    - e2e release --skip-tag --remote https://github.com/polyswarm/$CI_PROJECT_NAME.git
-    # release to public pypi and tag
-    - e2e release
-      -u "$PUBLIC_TWINE_USERNAME"
-      -p "$PUBLIC_TWINE_PASSWORD"
-      -r "$PUBLIC_TWINE_REPOSITORY_URL"
-      --remote "https://github.com/polyswarm/$CI_PROJECT_NAME.git"
 
-###############################################################
-# Trigger other CI builds
-###############################################################
+release-pypi:
+  extends: .release-pypi-public
